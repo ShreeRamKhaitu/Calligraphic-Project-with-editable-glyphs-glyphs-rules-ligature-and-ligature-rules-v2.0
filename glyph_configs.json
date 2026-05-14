@@ -1,0 +1,61 @@
+{
+  "क": {
+    "half": {
+      "scale": 0.7,
+      "x_offset": 0,
+      "y_offset": -15
+    },
+    "first": {
+      "scale": 1.0,
+      "x_offset": 0,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 0,
+      "crop_bottom": 10,
+      "crop_left": 0,
+      "crop_right": 0
+    }
+  },
+  "ल": {
+    "middle": {
+      "scale": 1.0,
+      "x_offset": 0,
+      "y_offset": -42,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 20,
+      "crop_bottom": 10,
+      "crop_left": 0,
+      "crop_right": 0
+    },
+    "last": {
+      "scale": 1.0,
+      "x_offset": 0,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 3,
+      "crop_bottom": 0,
+      "crop_left": 0,
+      "crop_right": 0
+    }
+  },
+  "म": {
+    "last": {
+      "scale": 1.0,
+      "x_offset": -23,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 13,
+      "crop_bottom": 0,
+      "crop_left": 0,
+      "crop_right": 0
+    }
+  }
+}

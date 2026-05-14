@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ranjana Script – AI Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    @font-face {
+      font-family: 'NithyaRanjanaDU-Regular';
+      src: url('/static/NithyaRanjanaDU-Regular.otf');
+    }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #161b27;
+      --surface2: #1e2535;
+      --border: #2a3348;
+      --accent: #6c63ff;
+      --accent2: #a78bfa;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 36px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    header .logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      background: linear-gradient(90deg, #c4b5fd, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header span.subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+
+    .header-status {
+      margin-left: auto;
+      display: flex;
+      gap: 18px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .header-status .pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s;
+    }
+
+    .dot.on {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .dot.off {
+      background: var(--muted);
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 36px 24px;
+      flex: 1;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px;
+      margin-bottom: 32px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px 20px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tab:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(108, 99, 255, 0.4);
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .card:hover {
+      border-color: #3a4460;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-desc {
+      font-size: 0.83rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 24px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: white;
+      box-shadow: 0 4px 14px rgba(108, 99, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(108, 99, 255, 0.45);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent2);
+    }
+
+    .btn-danger {
+      background: rgba(248, 113, 113, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(248, 113, 113, 0.22);
+    }
+
+    .btn-success {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .btn-success:hover {
+      background: rgba(52, 211, 153, 0.22);
+    }
+
+    /* ── Progress / Status bar ── */
+    .status-bar {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-top: 16px;
+      font-size: 0.83rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 52px;
+      transition: all 0.3s;
+    }
+
+    .status-bar .icon {
+      font-size: 1.1rem;
+    }
+
+    .status-bar .status-text {
+      flex: 1;
+      color: var(--muted);
+    }
+
+    .status-bar.running .status-text {
+      color: var(--accent2);
+    }
+
+    .status-bar.done .status-text {
+      color: var(--success);
+    }
+
+    .status-bar.error .status-text {
+      color: var(--danger);
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    .status-bar.running .spinner {
+      display: block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent2), #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ── Predict section ── */
+    .predict-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 640px) {
+      .predict-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-status .pill span {
+        display: none;
+      }
+    }
+
+    .canvas-wrap {
+      position: relative;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      cursor: crosshair;
+    }
+
+    #drawCanvas,
+    #wordCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: var(--surface2);
+      position: relative;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(108, 99, 255, 0.06);
+    }
+
+    .drop-zone input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .drop-zone .dz-icon {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .drop-zone .dz-text {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .drop-zone .dz-text strong {
+      color: var(--accent2);
+    }
+
+    .result-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+    }
+
+    .result-char {
+      font-size: 3.5rem;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent2), #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: pop 0.35s cubic-bezier(.18, .89, .32, 1.28);
+    }
+
+    .result-deva {
+      font-size: 2.4rem;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #34d399, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: pop 0.35s cubic-bezier(.18, .89, .32, 1.28);
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .result-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .result-conf {
+      font-size: 0.8rem;
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+
+    .prob-list {
+      width: 100%;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .prob-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+    }
+
+    .prob-label {
+      color: var(--muted);
+      width: 28px;
+      text-align: right;
+    }
+
+    .prob-bar-wrap {
+      flex: 1;
+      background: var(--surface);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .prob-bar {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.5s ease;
+    }
+
+    .prob-val {
+      color: var(--text);
+      width: 36px;
+      text-align: right;
+    }
+
+    /* ── Tab panels ── */
+    .panel {
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── Accuracy badge ── */
+    .accuracy-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      background: rgba(52, 211, 153, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      border-radius: 20px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .canvas-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* ── Monogram Generator ──────────────────────────────── */
+    .mono-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 780px) {
+      .mono-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mono-preview-wrap {
+      background: repeating-conic-gradient(#1e2535 0% 25%, #161b27 0% 50%) 0 0 / 20px 20px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      min-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 12px;
+      position: relative;
+    }
+
+    .mono-preview-wrap img {
+      max-width: 100%;
+      max-height: 480px;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      animation: pop 0.3s ease;
+    }
+
+    .mono-placeholder {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .mono-placeholder .mp-icon {
+      font-size: 2.4rem;
+      margin-bottom: 8px;
+    }
+
+    textarea.mono-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      padding: 14px 16px;
+      resize: vertical;
+      min-height: 90px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea.mono-input:focus {
+      border-color: var(--accent);
+    }
+
+    textarea.mono-input::placeholder {
+      color: var(--muted);
+    }
+
+    .mono-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .mono-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    .mono-field {
+      flex: 1;
+      min-width: 100px;
+    }
+
+    input[type=range].mono-slider {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    input[type=color].mono-color {
+      width: 48px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+      background: var(--surface2);
+      cursor: pointer;
+    }
+
+    .mono-detect-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 2px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface2);
+      margin-top: 6px;
+      transition: all 0.2s;
+    }
+
+    .mono-detect-badge.deva {
+      border-color: rgba(52, 211, 153, 0.4);
+      color: var(--success);
+      background: rgba(52, 211, 153, 0.08);
+    }
+
+    .mono-detect-badge.roman {
+      border-color: rgba(167, 139, 250, 0.4);
+      color: var(--accent2);
+      background: rgba(167, 139, 250, 0.08);
+    }
+
+    .mono-converted {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+      min-height: 1.2em;
+      word-break: break-all;
+    }
+
+    .mono-converted span {
+      color: var(--accent2);
+    }
+
+    .transparent-check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .transparent-check input {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* ── Word Builder ── */
+    .word-builder-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 720px) {
+      .word-builder-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .word-display {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .word-translit {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--accent2);
+      letter-spacing: 0.04em;
+      word-break: break-all;
+      min-height: 1.5em;
+    }
+
+    .word-devanagari {
+      font-size: 2.2rem;
+      line-height: 1.3;
+      word-break: break-all;
+      background: linear-gradient(135deg, #34d399, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      min-height: 1.5em;
+    }
+
+    .char-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .char-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      gap: 2px;
+      position: relative;
+      animation: pop 0.25s ease;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .char-chip:hover {
+      border-color: var(--danger);
+      background: rgba(248, 113, 113, 0.08);
+    }
+
+    .char-chip .chip-deva {
+      font-size: 1.3rem;
+      color: var(--success);
+    }
+
+    .char-chip .chip-latin {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .char-chip .chip-conf {
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+
+    .char-chip .chip-remove {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.6rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .char-chip:hover .chip-remove {
+      display: flex;
+    }
+
+    .wb-status {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wb-mini-spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .word-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .copy-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: rgba(167, 139, 250, 0.1);
+      color: var(--accent2);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(167, 139, 250, 0.2);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">🖊️</div>
+    <div>
+      <h1>Ranjana AI Studio</h1>
+      <div class="subtitle">Calligraphic Script Recognition</div>
+    </div>
+    <div class="header-status">
+      <div class="pill">
+        <div class="dot" id="dotDataset"></div>
+        <span id="lblDataset">No Dataset</span>
+      </div>
+      <div class="pill">
+        <div class="dot" id="dotModel"></div>
+        <span id="lblModel">No Model</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-label">Dataset Images</div>
+        <div class="stat-value" id="statImages">–</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Character Classes</div>
+        <div class="stat-value" id="statClasses">–</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Model Accuracy</div>
+        <div class="stat-value" id="statAccuracy">–</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">API Status</div>
+        <div class="stat-value" style="font-size:1rem; -webkit-text-fill-color: var(--success);" id="statApi">Live ✓
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab active" id="tabGenerate" onclick="switchTab('generate')">⚡ Generate Data</button>
+      <button class="tab" id="tabTrain" onclick="switchTab('train')">🧠 Train Model</button>
+      <button class="tab" id="tabPredict" onclick="switchTab('predict')">🔍 Predict Char</button>
+      <button class="tab" id="tabWord" onclick="switchTab('word')">📝 Word Builder</button>
+      <button class="tab" id="tabMonogram" onclick="switchTab('monogram')">🎨 Monogram</button>
+      <button class="tab" id="tabGlyph" onclick="switchTab('glyph')">🛠️ Glyph Studio</button>
+      <button class="tab" id="tabLigature" onclick="switchTab('ligature')">🔗 Ligature Studio</button>
+    </div>
+
+    <!-- Generate Panel -->
+    <div class="panel active" id="panelGenerate">
+      <div class="card">
+        <div class="card-title">📦 Dataset Generator</div>
+        <div class="card-desc">
+          Renders all Ranjana script characters using the NithyaRanjanaDU font, then applies random rotations and shifts
+          to produce <strong>21 samples per class</strong>. Existing data will be overwritten.
+        </div>
+        <button class="btn btn-primary" id="btnGenerate" onclick="startGenerate()">⚡ Generate Dataset</button>
+        <div class="status-bar" id="statusGenerate">
+          <span class="spinner"></span>
+          <span class="status-text">Ready to generate.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Train Panel -->
+    <div class="panel" id="panelTrain">
+      <div class="card">
+        <div class="card-title">🧠 Model Trainer</div>
+        <div class="card-desc">
+          Trains a <strong>Random Forest (100 estimators)</strong> on the generated dataset, evaluates on a 20% test
+          split, and saves the model as <code>ranjana_rf_model.pkl</code>.
+        </div>
+        <button class="btn btn-primary" id="btnTrain" onclick="startTrain()">🧠 Train Model</button>
+        <div class="status-bar" id="statusTrain">
+          <span class="spinner"></span>
+          <span class="status-text">Generate a dataset first, then train the model.</span>
+        </div>
+        <div id="accuracyResult" style="margin-top: 16px; display: none;">
+          <span class="stat-label">Final Accuracy</span><br />
+          <span class="accuracy-badge" id="accuracyValue"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Predict Panel (single character) -->
+    <div class="panel" id="panelPredict">
+      <div class="predict-grid">
+
+        <!-- Left: Draw -->
+        <div class="card">
+          <div class="card-title">✏️ Draw a Character</div>
+          <div class="card-desc">Draw a Ranjana character on the canvas below, then click Predict.</div>
+          <div class="canvas-wrap">
+            <canvas id="drawCanvas" width="280" height="280"></canvas>
+          </div>
+          <div class="canvas-controls">
+            <button class="btn btn-primary" onclick="predictCanvas()">🔍 Predict Drawing</button>
+            <button class="btn btn-ghost" onclick="clearCanvas()">🗑️ Clear</button>
+          </div>
+        </div>
+
+        <!-- Right: Upload -->
+        <div class="card">
+          <div class="card-title">📁 Upload an Image</div>
+          <div class="card-desc">Upload a grayscale or color image of a Ranjana character.</div>
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])" />
+            <div class="dz-icon">🖼️</div>
+            <div class="dz-text">Drop image here or <strong>click to browse</strong></div>
+          </div>
+          <div style="margin-top: 12px;">
+            <button class="btn btn-primary" onclick="predictFile()" id="btnPredictFile" disabled>🔍 Predict
+              Upload</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Result -->
+      <div class="card" id="resultCard" style="display: none;">
+        <div class="card-title">🎯 Prediction Result</div>
+        <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+          <div class="result-box" style="flex: 0 0 200px;">
+            <div class="result-char" id="resultChar">–</div>
+            <div class="result-deva" id="resultDeva">–</div>
+            <div class="result-label" id="resultLabel">–</div>
+            <div class="result-conf" id="resultConf">–</div>
+          </div>
+          <div style="flex: 1; min-width: 200px;">
+            <div class="stat-label" style="margin-bottom: 8px;">Top class probabilities</div>
+            <div class="prob-list" id="probList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Word Builder Panel -->
+    <div class="panel" id="panelWord">
+
+      <div class="word-builder-grid">
+
+        <!-- Canvas side -->
+        <div>
+          <div class="card">
+            <div class="card-title">✏️ Draw Next Character</div>
+            <div class="card-desc">Draw one Ranjana character at a time. Each prediction adds to the word.</div>
+            <div class="canvas-wrap">
+              <canvas id="wordCanvas" width="280" height="280"></canvas>
+            </div>
+            <div class="canvas-controls">
+              <button class="btn btn-primary" id="btnWbPredict" onclick="wbPredict()">➕ Add Character</button>
+              <button class="btn btn-ghost" onclick="wbClearCanvas()">🗑️ Clear</button>
+            </div>
+            <div class="wb-status" id="wbStatus" style="margin-top: 10px; min-height: 20px;"></div>
+          </div>
+        </div>
+
+        <!-- Word display side -->
+        <div>
+          <div class="card">
+            <div class="card-title">📝 Word Being Built</div>
+            <div class="card-desc">Each predicted character is shown as a chip. Click a chip to remove it.</div>
+
+            <div class="char-chips" id="charChips">
+              <span style="color: var(--muted); font-size: 0.82rem;">No characters yet. Draw and add one →</span>
+            </div>
+
+            <div style="margin-top: 20px;">
+              <div class="stat-label" style="margin-bottom: 6px;">Transliteration</div>
+              <div class="word-translit" id="wordTranslit">—</div>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="stat-label" style="margin-bottom: 6px;">Devanagari</div>
+              <div class="word-devanagari" id="wordDevanagari">—</div>
+            </div>
+
+            <div class="word-actions">
+              <button class="copy-btn" onclick="copyText('translit')">📋 Copy Transliteration</button>
+              <button class="copy-btn" onclick="copyText('deva')">📋 Copy Devanagari</button>
+              <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;" onclick="wbRenderVertical()">🎨 Render Vertical</button>
+              <button class="btn btn-danger" style="padding: 6px 14px; font-size: 0.8rem;" onclick="wbClearWord()">✕ Clear Word</button>
+            </div>
+          </div>
+
+          <!-- Vertical Word Preview -->
+          <div class="card" id="wbVerticalCard" style="display: none; margin-top: 16px;">
+            <div class="card-title">🪷 Vertical Calligraphy</div>
+            <div class="mono-preview-wrap" style="background: var(--bg-card); min-height: 150px; display: flex; justify-content: center; align-items: center; border-radius: 8px; border: 1px dashed var(--border);">
+              <img id="wbVerticalImg" src="" alt="Vertical Word" style="max-height: 400px; display: none;">
+              <div id="wbVerticalStatus" style="color: var(--muted); font-size: 0.85rem;">Click 'Render Vertical' to generate...</div>
+            </div>
+          </div>
+
+          <!-- Last char prediction confidence -->
+          <div class="card" id="wbResultCard" style="display: none;">
+            <div class="card-title" style="font-size: 0.9rem;">🎯 Last Character Prediction</div>
+            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+              <div class="result-box" style="flex: 0 0 120px; min-height: 80px; padding: 12px;">
+                <div class="result-char" id="wbResultChar" style="font-size: 2rem;">–</div>
+                <div class="result-deva" id="wbResultDeva" style="font-size: 1.6rem;">–</div>
+                <div class="result-conf" id="wbResultConf">–</div>
+              </div>
+              <div style="flex: 1; min-width: 160px;">
+                <div class="stat-label" style="margin-bottom: 6px;">Top probabilities</div>
+                <div class="prob-list" id="wbProbList" style="max-height: 140px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Monogram Panel -->
+    <div class="panel" id="panelMonogram">
+
+      <div class="mono-grid">
+
+        <!-- Controls -->
+        <div class="card">
+          <div class="card-title">🎨 Monogram Generator</div>
+          <div class="card-desc">Type in romanized transliteration <em>or</em> Devanagari. Romanized input is
+            auto-converted before
+            rendering via the NithyaRanjana font.</div>
+
+          <label class="mono-label" for="monoInput">Text</label>
+          <textarea class="mono-input" id="monoInput" placeholder="e.g.  namaskar  or  नमस्कार" rows="3"
+            oninput="monoOnInput()"></textarea>
+          <div class="mono-detect-badge" id="monoDetect">type something…</div>
+          <div class="mono-converted" id="monoConverted"></div>
+
+          <div style="margin-top: 20px;"></div>
+          
+          <details style="margin-top: 10px; cursor: pointer;">
+            <summary class="mono-label" style="display: list-item;">⌨️ Transliteration Guide</summary>
+            <div style="background: var(--surface2); padding: 12px; border-radius: 8px; font-size: 0.75rem; margin-top: 8px; border: 1px solid var(--border);">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="color:var(--accent2); font-weight:600;">k, kh, g, gh</td><td>क ख ग घ</td></tr>
+                <tr><td style="color:var(--accent2); font-weight:600;">c, ch, j, jh</td><td>च छ ज झ</td></tr>
+                <tr><td style="color:var(--accent2); font-weight:600;">t, th, d, dh</td><td>त थ द ध</td></tr>
+                <tr><td style="color:var(--accent2); font-weight:600;">T, Th, D, Dh</td><td>ट ठ ड ढ</td></tr>
+                <tr><td style="color:var(--accent2); font-weight:600;">s, sh, S</td><td>श ष स</td></tr>
+                <tr><td style="color:var(--accent2); font-weight:600;">* (asterisk)</td><td>् (Halant)</td></tr>
+                <tr><td style="color:var(--accent2); font-weight:600;">a, aa, i, ii</td><td>अ आ इ ई</td></tr>
+                <tr><td style="color:var(--accent2); font-weight:600;">u, uu, e, ai</td><td>उ ऊ ए ऐ</td></tr>
+              </table>
+              <p style="margin-top: 8px; font-style: italic; color: var(--muted);">Tip: Use * for half-letters (e.g., "k*ra").</p>
+            </div>
+          </details>
+
+          <div class="mono-row">
+            <div class="mono-field">
+              <label class="mono-label">Font Size <span id="lblFontSize">80</span>px</label>
+              <input type="range" class="mono-slider" id="monoFontSize" min="30" max="200" value="80"
+                oninput="document.getElementById('lblFontSize').textContent=this.value">
+            </div>
+            <div class="mono-field">
+              <label class="mono-label">Padding <span id="lblPadding">40</span>px</label>
+              <input type="range" class="mono-slider" id="monoPadding" min="10" max="100" value="40"
+                oninput="document.getElementById('lblPadding').textContent=this.value">
+            </div>
+          </div>
+
+          <div class="mono-row" style="margin-top: 16px;">
+            <div class="mono-field">
+              <label class="mono-label">Ink Colour</label>
+              <input type="color" class="mono-color" id="monoFg" value="#2d1b69">
+            </div>
+            <div class="mono-field">
+              <label class="mono-label">Background Colour</label>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <input type="color" class="mono-color" id="monoBg" value="#ffffff" oninput="monoSyncBgState()">
+                <label class="transparent-check">
+                  <input type="checkbox" id="monoTransparent" onchange="monoSyncBgState()"> Transparent
+                </label>
+                <label class="transparent-check">
+                  <input type="checkbox" id="monoVertical" checked> Vertical Stack
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top: 22px; flex-wrap:wrap;">
+            <button class="btn btn-primary" id="btnMonoGen" onclick="monoGenerate()">🎨 Generate</button>
+            <button class="btn btn-success" id="btnMonoDl" onclick="monoDownload()" style="display:none;">⬇️ Download
+              PNG</button>
+            <button class="btn btn-ghost" onclick="monoReset()">✕ Reset</button>
+          </div>
+
+          <div class="status-bar" id="monoStatus" style="margin-top:14px;">
+            <span class="spinner"></span>
+            <span class="status-text">Enter text above and click Generate.</span>
+          </div>
+        </div>
+
+        <!-- Preview -->
+        <div>
+          <div class="card">
+            <div class="card-title">🖼️ Preview</div>
+            <div class="mono-preview-wrap" id="monoPreviewWrap">
+              <div class="mono-placeholder" id="monoPlaceholder">
+                <div class="mp-icon">🪷</div>
+                <div>Your Ranjana monogram<br>will appear here</div>
+              </div>
+              <img id="monoImg" src="" alt="Monogram" style="display:none;">
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- Session Gallery -->
+      <div class="card" style="margin-top: 24px;" id="monoGalleryCard">
+        <div class="card-title">📜 Session Gallery</div>
+        <div class="card-desc">Your recently generated monograms in this session.</div>
+        <div id="monoGallery" style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 10px; min-height: 100px;">
+          <span style="color: var(--muted); font-size: 0.85rem;">No history yet.</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Glyph Studio Panel -->
+    <div class="panel" id="panelGlyph">
+      <div class="section-header">
+        <div>
+          <h2 class="card-title">🛠️ Glyph Studio</h2>
+          <p class="card-desc">Fine-tune individual characters for the perfect monogram stack.</p>
+        </div>
+      </div>
+
+      <div class="mono-grid">
+        <!-- Controls -->
+        <div class="card">
+          <div class="mono-field" style="margin-bottom: 20px;">
+            <label class="mono-label">Base Character</label>
+            <select class="mono-input" id="glyphChar" onchange="glyphLoadConfig()">
+              <!-- Will be populated by JS -->
+            </select>
+          </div>
+
+          <div class="mono-field" style="margin-bottom: 20px;">
+            <label class="mono-label">Editing Mode</label>
+            <select class="mono-input" id="glyphType" onchange="glyphLoadConfig()">
+              <option value="full">Full Letter (Default)</option>
+              <option value="half">Half Letter (Conjunct)</option>
+              <option value="first">Top Position (First)</option>
+              <option value="middle">Middle Position</option>
+              <option value="last">Bottom Position (Last)</option>
+            </select>
+          </div>
+
+          <div class="mono-field" style="margin-bottom: 16px;">
+            <label class="mono-label">Scale: <span id="lblGlyphScale">1.0</span>x</label>
+            <input type="range" class="mono-slider" id="glyphScale" min="0.5" max="1.5" step="0.05" value="1.0" oninput="glyphUpdatePreview()">
+          </div>
+
+          <div class="mono-field" style="margin-bottom: 16px;">
+            <label class="mono-label">X-Offset: <span id="lblGlyphX">0</span>px</label>
+            <input type="range" class="mono-slider" id="glyphX" min="-50" max="50" step="1" value="0" oninput="glyphUpdatePreview()">
+          </div>
+
+          <div class="mono-field" style="margin-bottom: 16px;">
+            <label class="mono-label">Y-Offset: <span id="lblGlyphY">0</span>px</label>
+            <input type="range" class="mono-slider" id="glyphY" min="-50" max="50" step="1" value="0" oninput="glyphUpdatePreview()">
+          </div>
+
+          <div class="mono-row" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 16px;">
+            <div class="mono-field">
+              <label class="mono-label">Rotation: <span id="lblGlyphRot">0</span>°</label>
+              <input type="range" class="mono-slider" id="glyphRot" min="-180" max="180" step="1" value="0" oninput="glyphUpdatePreview()">
+            </div>
+          </div>
+          <div class="mono-row" style="margin-top: 10px; margin-bottom: 10px;">
+            <div class="mono-field">
+              <label class="mono-label">Skew X: <span id="lblGlyphSkewX">0.0</span></label>
+              <input type="range" class="mono-slider" id="glyphSkewX" min="-1.0" max="1.0" step="0.05" value="0" oninput="glyphUpdatePreview()">
+            </div>
+            <div class="mono-field">
+              <label class="mono-label">Skew Y: <span id="lblGlyphSkewY">0.0</span></label>
+              <input type="range" class="mono-slider" id="glyphSkewY" min="-1.0" max="1.0" step="0.05" value="0" oninput="glyphUpdatePreview()">
+            </div>
+          </div>
+
+          <div class="mono-row" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 16px;">
+            <div class="mono-field">
+              <label class="mono-label">Crop Top: <span id="lblCropTop">0</span>px</label>
+              <input type="range" class="mono-slider" id="glyphCropTop" min="0" max="100" step="1" value="0" oninput="glyphUpdatePreview()">
+            </div>
+            <div class="mono-field">
+              <label class="mono-label">Crop Bottom: <span id="lblCropBottom">0</span>px</label>
+              <input type="range" class="mono-slider" id="glyphCropBottom" min="0" max="100" step="1" value="0" oninput="glyphUpdatePreview()">
+            </div>
+          </div>
+          <div class="mono-row" style="margin-top: 10px; margin-bottom: 20px;">
+            <div class="mono-field">
+              <label class="mono-label">Crop Left: <span id="lblCropLeft">0</span>px</label>
+              <input type="range" class="mono-slider" id="glyphCropLeft" min="0" max="100" step="1" value="0" oninput="glyphUpdatePreview()">
+            </div>
+            <div class="mono-field">
+              <label class="mono-label">Crop Right: <span id="lblCropRight">0</span>px</label>
+              <input type="range" class="mono-slider" id="glyphCropRight" min="0" max="100" step="1" value="0" oninput="glyphUpdatePreview()">
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="glyphSaveConfig()">💾 Save Configuration</button>
+          <div id="glyphStatus" class="mono-converted" style="margin-top: 10px;"></div>
+        </div>
+
+        <!-- Preview -->
+        <div class="card">
+          <div class="card-title">🔍 Glyph Preview</div>
+          <div class="mono-preview-wrap">
+            <img id="glyphPreviewImg" src="" alt="Glyph Preview" style="max-height: 200px;">
+          </div>
+          <p class="card-desc" style="margin-top: 10px; text-align: center;">This preview shows how the character will appear in the stack.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ligature Studio Panel -->
+    <div class="panel" id="panelLigature">
+      <div class="section-header">
+        <div>
+          <h2 class="card-title">🔗 Ligature Studio</h2>
+          <p class="card-desc">Define custom joining rules for specific character combinations.</p>
+        </div>
+      </div>
+
+      <div class="mono-grid">
+        <!-- Controls -->
+        <div class="card">
+          <div class="card-title">⚙️ Ligature Rules</div>
+          
+          <div class="mono-field" style="margin-bottom: 16px;">
+            <label class="mono-label">Sequence (Select Ranjana Characters)</label>
+            <div id="ligSequenceBuilder" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                <!-- Character slots will be added here -->
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-ghost" onclick="ligAddSlot()">➕ Add Character</button>
+                <button class="btn btn-ghost" onclick="ligClearSlots()" style="color:var(--error);">✕ Clear</button>
+            </div>
+            <div id="ligFullSequence" style="margin-top:12px; font-weight:bold; color:var(--accent2); font-family: 'NithyaRanjanaDU-Regular'; font-size: 1.5rem;"></div>
+            <div id="ligRomanSequence" style="font-size: 0.8rem; color: var(--muted);"></div>
+          </div>
+
+          <button class="btn btn-primary" style="margin-top:20px;" onclick="ligSaveConfig()">💾 Save Ligature Rule</button>
+          <div id="ligStatus" class="mono-converted" style="margin-top: 10px;"></div>
+        </div>
+
+        <!-- Preview -->
+        <div class="card">
+          <div class="card-title">🔍 Ligature Preview</div>
+             <!-- Context-Aware Global Toolbar -->
+             <div id="ligToolbar" style="display:none; gap:8px; margin-bottom:12px; justify-content:center; width:100%; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:4px; border-right:1px solid var(--border); padding-right:8px;">
+                    <button class="btn btn-ghost" id="ligEraseBtn" title="Eraser Tool">🖌️ Erase</button>
+                    <input type="range" id="ligEraseSize" min="5" max="50" value="15" style="width:60px;" title="Eraser Size">
+                </div>
+                <div style="display:flex; align-items:center; background:var(--bg-alt); padding:2px; border-radius:8px; border:1px solid var(--border);">
+                    <button class="btn btn-ghost" id="ligSelectBtn" title="Move Tool">✂️ Move</button>
+                    <button class="btn btn-ghost" id="ligExtendBtn" title="Extend/Stretch Tool">↔️ Extend</button>
+                </div>
+                <div id="ligNudgeGroup" style="display:none; gap:4px; align-items:center; border-left:1px solid var(--border); padding-left:8px;">
+                    <button class="btn btn-ghost" onclick="ligNudgeSelection(0, -1)" title="Nudge Up">↑</button>
+                    <button class="btn btn-ghost" onclick="ligNudgeSelection(0, 1)" title="Nudge Down">↓</button>
+                    <button class="btn btn-ghost" onclick="ligNudgeSelection(-1, 0)" title="Nudge Left">←</button>
+                    <button class="btn btn-ghost" onclick="ligNudgeSelection(1, 0)" title="Nudge Right">→</button>
+                </div>
+                <button class="btn btn-ghost" id="ligClearEraseBtn" title="Reset Current Character" style="color:var(--error);">🗑️ Reset</button>
+                <div id="ligActiveIndicator" style="font-size:0.75rem; color:var(--accent2); margin-left:10px; font-weight:bold; display:none;">Editing: <span id="ligActiveChar">None</span></div>
+             </div>
+
+             <div id="ligPreviewContainer" style="display: flex; justify-content: center; align-items: center; width: 100%; position:relative; overflow: hidden; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);">
+                <img id="ligPreviewImg" src="" alt="Ligature Preview" style="max-width: 100%; max-height: 400px; display: none; padding: 20px;">
+                <canvas id="ligCorrectionCanvas" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); display:none; cursor:crosshair; width:100%; height:100%; object-fit:contain; opacity:0.3;"></canvas>
+                <canvas id="ligOverlayCanvas" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); display:none; pointer-events:none; width:100%; height:100%; object-fit:contain;"></canvas>
+                <div id="ligPreviewPlaceholder" style="color: var(--muted); font-size: 0.85rem;">Add characters to see preview...</div>
+             </div>
+             <p id="ligPreviewText" style="margin-top:20px; font-size:1.2rem; color:var(--muted);"></p>
+          </div>
+          <p class="card-desc" style="margin-top: 10px; text-align: center;">Use the Eraser to surgically correct character joins.</p>
+          <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+            <button class="btn" onclick="ligSaveConfig()" style="background:var(--success);">Save Ligature Rule</button>
+            <button class="btn" onclick="ligInjectDataset()" style="background:var(--accent);">🧪 Inject into Training Set</button>
+          </div>
+      </div>
+      
+      <div class="card" style="margin-top:24px;">
+        <div class="card-title">📋 Defined Ligatures</div>
+        <div id="ligList" style="display:flex; flex-wrap:wrap; gap:12px; margin-top:12px;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API = 'http://localhost:8000';
+    let lastUploadedFile = null;
+    let generatePollInterval = null;
+    let trainPollInterval = null;
+
+    // ── Devanagari map (mirrors data_gen.py) ──────────────────
+    const DEVA_MAP = {
+      'k': 'क', 'kh': 'ख', 'g': 'ग', 'gh': 'घ', 'ng': 'ङ',
+      'c': 'च', 'ch': 'छ', 'j': 'ज', 'jh': 'झ', 'ny': 'ञ',
+      'T': 'ट', 'Th': 'ठ', 'D': 'ड', 'Dh': 'ढ', 'N': 'ण',
+      't': 'त', 'th': 'थ', 'd': 'द', 'dh': 'ध', 'n': 'न',
+      'p': 'प', 'ph': 'फ', 'b': 'ब', 'bh': 'भ', 'm': 'म',
+      'y': 'य', 'r': 'र', 'l': 'ल', 'v': 'व', 'w': 'व',
+      's': 'श', 'sh': 'ष', 'S': 'स', 'h': 'ह',
+      '*': '्',
+      'a': 'अ', 'aa': 'आ', 'i': 'इ', 'ii': 'ई', 'u': 'उ', 'uu': 'ऊ',
+      'e': 'ए', 'ai': 'ऐ', 'o': 'ओ', 'au': 'औ',
+      '0': '०', '1': '१', '2': '२', '3': '३', '4': '४',
+      '5': '५', '6': '६', '7': '७', '8': '८', '9': '९',
+      '.': '।', ',': ',', '(': '(', ')': ')', '-': '-', '?': '?'
+    };
+
+    function toLatin(cls) { return cls; }
+    function toDeva(cls) { return DEVA_MAP[cls] || cls; }
+
+    // ── Tab switching ─────────────────────────────────────────
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+      document.getElementById('panel' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+    }
+
+    // ── Status helpers ────────────────────────────────────────
+    function setStatus(el, state, msg) {
+      el.className = 'status-bar ' + state;
+      el.querySelector('.status-text').textContent = msg;
+    }
+
+    // ── System status polling ─────────────────────────────────
+    async function refreshStatus() {
+      try {
+        const res = await fetch(`${API}/status`);
+        const d = await res.json();
+        document.getElementById('statImages').textContent = d.dataset_size || '0';
+        document.getElementById('statClasses').textContent = d.classes_count || '0';
+        document.getElementById('dotDataset').className = 'dot ' + (d.dataset_exists ? 'on' : 'off');
+        document.getElementById('lblDataset').textContent = d.dataset_exists ? `${d.classes_count} Classes` : 'No Dataset';
+        document.getElementById('dotModel').className = 'dot ' + (d.model_exists ? 'on' : 'off');
+        document.getElementById('lblModel').textContent = d.model_exists ? 'Model Ready' : 'No Model';
+      } catch (e) {
+        document.getElementById('statApi').textContent = 'Offline ✗';
+        document.getElementById('statApi').style['-webkit-text-fill-color'] = 'var(--danger)';
+      }
+    }
+
+    // ── Generate ──────────────────────────────────────────────
+    async function startGenerate() {
+      const btn = document.getElementById('btnGenerate');
+      const statusEl = document.getElementById('statusGenerate');
+      btn.disabled = true;
+      setStatus(statusEl, 'running', 'Starting data generation…');
+      await fetch(`${API}/generate`, { method: 'POST' });
+      generatePollInterval = setInterval(async () => {
+        const res = await fetch(`${API}/job/generate`);
+        const d = await res.json();
+        if (d.status === 'running') { setStatus(statusEl, 'running', d.message || 'Generating…'); }
+        else if (d.status === 'done') { clearInterval(generatePollInterval); setStatus(statusEl, 'done', '✓ ' + d.message); btn.disabled = false; refreshStatus(); }
+        else if (d.status === 'error') { clearInterval(generatePollInterval); setStatus(statusEl, 'error', '✗ ' + d.message); btn.disabled = false; }
+      }, 1500);
+    }
+
+    // ── Train ─────────────────────────────────────────────────
+    async function startTrain() {
+      const btn = document.getElementById('btnTrain');
+      const statusEl = document.getElementById('statusTrain');
+      const accResult = document.getElementById('accuracyResult');
+      btn.disabled = true; accResult.style.display = 'none';
+      setStatus(statusEl, 'running', 'Training model, this may take a minute…');
+      await fetch(`${API}/train`, { method: 'POST' });
+      trainPollInterval = setInterval(async () => {
+        const res = await fetch(`${API}/job/train`);
+        const d = await res.json();
+        if (d.status === 'running') { setStatus(statusEl, 'running', d.message || 'Training…'); }
+        else if (d.status === 'done') {
+          clearInterval(trainPollInterval); setStatus(statusEl, 'done', '✓ ' + d.message); btn.disabled = false;
+          if (d.accuracy != null) {
+            document.getElementById('accuracyValue').textContent = (d.accuracy * 100).toFixed(1) + '%';
+            document.getElementById('statAccuracy').textContent = (d.accuracy * 100).toFixed(1) + '%';
+            accResult.style.display = 'block';
+          }
+          refreshStatus();
+        } else if (d.status === 'error') { clearInterval(trainPollInterval); setStatus(statusEl, 'error', '✗ ' + d.message); btn.disabled = false; }
+      }, 2000);
+    }
+
+    // ── Upload ────────────────────────────────────────────────
+    function handleFile(file) {
+      if (!file) return;
+      lastUploadedFile = file;
+      const dz = document.getElementById('dropZone');
+      dz.querySelector('.dz-icon').textContent = '✅';
+      dz.querySelector('.dz-text').innerHTML = `<strong>${file.name}</strong>`;
+      document.getElementById('btnPredictFile').disabled = false;
+    }
+
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+
+    async function predictFile() {
+      if (!lastUploadedFile) return;
+      await sendFileForPrediction(lastUploadedFile);
+    }
+
+    // ── Canvas (single char) ──────────────────────────────────
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 280, 280);
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    let drawing = false, lastX = 0, lastY = 0;
+
+    function getPos(e, cnv) {
+      const r = cnv.getBoundingClientRect();
+      const scaleX = cnv.width / r.width, scaleY = cnv.height / r.height;
+      const src = e.touches ? e.touches[0] : e;
+      return [(src.clientX - r.left) * scaleX, (src.clientY - r.top) * scaleY];
+    }
+
+    canvas.addEventListener('mousedown', e => { drawing = true;[lastX, lastY] = getPos(e, canvas); });
+    canvas.addEventListener('mousemove', e => {
+      if (!drawing) return;
+      const [x, y] = getPos(e, canvas);
+      ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+      [lastX, lastY] = [x, y];
+    });
+    canvas.addEventListener('mouseup', () => drawing = false);
+    canvas.addEventListener('mouseleave', () => drawing = false);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true;[lastX, lastY] = getPos(e, canvas); });
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault(); if (!drawing) return;
+      const [x, y] = getPos(e, canvas);
+      ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+      [lastX, lastY] = [x, y];
+    });
+    canvas.addEventListener('touchend', () => drawing = false);
+
+    function clearCanvas() {
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 280, 280);
+      document.getElementById('resultCard').style.display = 'none';
+    }
+
+    async function predictCanvas() {
+      canvas.toBlob(async blob => { await sendFileForPrediction(blob, 'drawing.png'); }, 'image/png');
+    }
+
+    // ── Single char predict result ────────────────────────────
+    async function sendFileForPrediction(file, name) {
+      const form = new FormData();
+      form.append('file', file, name || file.name);
+      const resultCard = document.getElementById('resultCard');
+      resultCard.style.display = 'block';
+      document.getElementById('resultChar').textContent = '…';
+      document.getElementById('resultDeva').textContent = '…';
+      document.getElementById('resultLabel').textContent = 'Predicting…';
+      document.getElementById('resultConf').textContent = '';
+      document.getElementById('probList').innerHTML = '';
+      try {
+        const res = await fetch(`${API}/predict`, { method: 'POST', body: form });
+        const d = await res.json();
+        if (d.error) {
+          document.getElementById('resultChar').textContent = '✗';
+          document.getElementById('resultDeva').textContent = '';
+          document.getElementById('resultLabel').textContent = d.error;
+          return;
+        }
+        document.getElementById('resultChar').textContent = d.predicted_class;
+        document.getElementById('resultDeva').textContent = d.devanagari || toDeva(d.predicted_class);
+        document.getElementById('resultLabel').textContent = `Class: ${d.predicted_class}`;
+        document.getElementById('resultConf').textContent = `Confidence: ${(d.confidence * 100).toFixed(1)}%`;
+
+        const sorted = Object.entries(d.all_probs).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        const maxProb = sorted[0][1];
+        document.getElementById('probList').innerHTML = sorted.map(([label, prob]) =>
+          `<div class="prob-row">
+        <span class="prob-label">${label}</span>
+        <div class="prob-bar-wrap"><div class="prob-bar" style="width:${(prob / maxProb * 100).toFixed(1)}%"></div></div>
+        <span class="prob-val">${(prob * 100).toFixed(1)}%</span>
+      </div>`
+        ).join('');
+      } catch (e) {
+        document.getElementById('resultChar').textContent = '!';
+        document.getElementById('resultDeva').textContent = '';
+        document.getElementById('resultLabel').textContent = 'Prediction failed. Is the API running?';
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // ── Word Builder ──────────────────────────────────────════
+    // ══════════════════════════════════════════════════════════
+    const wbCanvas = document.getElementById('wordCanvas');
+    const wbCtx = wbCanvas.getContext('2d');
+    wbCtx.fillStyle = '#fff'; wbCtx.fillRect(0, 0, 280, 280);
+    wbCtx.strokeStyle = '#000'; wbCtx.lineWidth = 12; wbCtx.lineCap = 'round'; wbCtx.lineJoin = 'round';
+    let wbDrawing = false, wbLastX = 0, wbLastY = 0;
+
+    wbCanvas.addEventListener('mousedown', e => { wbDrawing = true;[wbLastX, wbLastY] = getPos(e, wbCanvas); });
+    wbCanvas.addEventListener('mousemove', e => {
+      if (!wbDrawing) return;
+      const [x, y] = getPos(e, wbCanvas);
+      wbCtx.beginPath(); wbCtx.moveTo(wbLastX, wbLastY); wbCtx.lineTo(x, y); wbCtx.stroke();
+      [wbLastX, wbLastY] = [x, y];
+    });
+    wbCanvas.addEventListener('mouseup', () => wbDrawing = false);
+    wbCanvas.addEventListener('mouseleave', () => wbDrawing = false);
+    wbCanvas.addEventListener('touchstart', e => { e.preventDefault(); wbDrawing = true;[wbLastX, wbLastY] = getPos(e, wbCanvas); });
+    wbCanvas.addEventListener('touchmove', e => {
+      e.preventDefault(); if (!wbDrawing) return;
+      const [x, y] = getPos(e, wbCanvas);
+      wbCtx.beginPath(); wbCtx.moveTo(wbLastX, wbLastY); wbCtx.lineTo(x, y); wbCtx.stroke();
+      [wbLastX, wbLastY] = [x, y];
+    });
+    wbCanvas.addEventListener('touchend', () => wbDrawing = false);
+
+    function wbClearCanvas() {
+      wbCtx.fillStyle = '#fff'; wbCtx.fillRect(0, 0, 280, 280);
+    }
+
+    // Current word state
+    let wbChars = []; // [{ cls, deva, conf }]
+
+    function wbRenderWord() {
+      const chips = document.getElementById('charChips');
+      if (wbChars.length === 0) {
+        chips.innerHTML = '<span style="color: var(--muted); font-size: 0.82rem;">No characters yet. Draw and add one →</span>';
+        document.getElementById('wordTranslit').textContent = '—';
+        document.getElementById('wordDevanagari').textContent = '—';
+        document.getElementById('wbVerticalCard').style.display = 'none';
+        return;
+      }
+      document.getElementById('wbVerticalCard').style.display = 'block';
+      chips.innerHTML = wbChars.map((c, i) =>
+        `<div class="char-chip" title="Click to remove" onclick="wbRemoveChar(${i})">
+      <button class="chip-remove">✕</button>
+      <span class="chip-deva">${c.deva}</span>
+      <span class="chip-latin">${c.cls}</span>
+      <span class="chip-conf">${(c.conf * 100).toFixed(0)}%</span>
+    </div>`
+      ).join('');
+      document.getElementById('wordTranslit').textContent = wbChars.map(c => c.cls).join('');
+      document.getElementById('wordDevanagari').textContent = wbChars.map(c => c.deva).join('');
+    }
+
+    async function wbRenderVertical() {
+      const deva = document.getElementById('wordDevanagari').textContent;
+      if (!deva || deva === '—') return;
+      
+      const img = document.getElementById('wbVerticalImg');
+      const status = document.getElementById('wbVerticalStatus');
+      
+      status.textContent = 'Generating...';
+      img.style.display = 'none';
+      
+      const payload = {
+        text: deva,
+        font_size: 80,
+        fg_color: '#2d1b69',
+        bg_color: 'transparent',
+        padding: 40,
+        vertical: true,
+        use_overrides: true
+      };
+      
+      try {
+        const res = await fetch(`${API}/monogram`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const blob = await res.blob();
+        img.src = URL.createObjectURL(blob);
+        img.style.display = 'block';
+        status.textContent = '';
+      } catch (e) {
+        status.textContent = '⚠️ Generation failed';
+      }
+    }
+
+    function wbRemoveChar(idx) {
+      wbChars.splice(idx, 1);
+      wbRenderWord();
+    }
+
+    function wbClearWord() {
+      wbChars = [];
+      wbRenderWord();
+      document.getElementById('wbResultCard').style.display = 'none';
+      document.getElementById('wbVerticalCard').style.display = 'none';
+      setWbStatus('');
+    }
+
+    function setWbStatus(msg, loading = false) {
+      const el = document.getElementById('wbStatus');
+      if (!msg) { el.innerHTML = ''; return; }
+      el.innerHTML = loading
+        ? `<div class="wb-mini-spinner"></div><span>${msg}</span>`
+        : `<span>${msg}</span>`;
+    }
+
+    async function wbPredict() {
+      const btn = document.getElementById('btnWbPredict');
+      btn.disabled = true;
+      setWbStatus('Predicting…', true);
+
+      wbCanvas.toBlob(async blob => {
+        const form = new FormData();
+        form.append('file', blob, 'wb_char.png');
+        try {
+          const res = await fetch(`${API}/predict`, { method: 'POST', body: form });
+          const d = await res.json();
+          if (d.error) { setWbStatus('⚠️ ' + d.error); btn.disabled = false; return; }
+
+          const cls = d.predicted_class;
+          const deva = d.devanagari || toDeva(cls);
+          const conf = d.confidence;
+
+          // Add to word
+          wbChars.push({ cls, deva, conf });
+          wbRenderWord();
+
+          // Show last prediction
+          document.getElementById('wbResultCard').style.display = 'block';
+          document.getElementById('wbResultChar').textContent = cls;
+          document.getElementById('wbResultDeva').textContent = deva;
+          document.getElementById('wbResultConf').textContent = `${(conf * 100).toFixed(1)}%`;
+
+          const sorted = Object.entries(d.all_probs).sort((a, b) => b[1] - a[1]).slice(0, 8);
+          const maxProb = sorted[0][1];
+          document.getElementById('wbProbList').innerHTML = sorted.map(([label, prob]) =>
+            `<div class="prob-row">
+          <span class="prob-label">${label}</span>
+          <div class="prob-bar-wrap"><div class="prob-bar" style="width:${(prob / maxProb * 100).toFixed(1)}%"></div></div>
+          <span class="prob-val">${(prob * 100).toFixed(1)}%</span>
+        </div>`
+          ).join('');
+
+          setWbStatus(`✓ Added "${cls}" (${(conf * 100).toFixed(1)}%) — clear canvas to draw next char`);
+          // Auto-clear canvas after adding
+          wbClearCanvas();
+        } catch (e) {
+          setWbStatus('⚠️ Prediction failed. Is the API running?');
+        }
+        btn.disabled = false;
+      }, 'image/png');
+    }
+
+    // ── Copy helpers ──────────────────────────────────────────
+    function copyText(type) {
+      const text = type === 'translit'
+        ? document.getElementById('wordTranslit').textContent
+        : document.getElementById('wordDevanagari').textContent;
+      if (text === '—' || text === '') return;
+      navigator.clipboard.writeText(text).then(() => {
+        const label = type === 'translit' ? 'Transliteration' : 'Devanagari';
+        setWbStatus(`📋 ${label} copied to clipboard!`);
+        setTimeout(() => setWbStatus(''), 2000);
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // ── Monogram ──────────────────────────────────────────════
+    // ══════════════════════════════════════════════════════════
+    function monoOnInput() {
+      const input = document.getElementById('monoInput').value;
+      const detectEl = document.getElementById('monoDetect');
+      const convEl = document.getElementById('monoConverted');
+
+      if (!input.trim()) {
+        detectEl.textContent = 'type something…';
+        detectEl.className = 'mono-detect-badge';
+        convEl.innerHTML = '';
+        return;
+      }
+
+      // Detect if Devanagari or Romanized
+      const isDeva = /[\u0900-\u097F]/.test(input);
+
+      if (isDeva) {
+        detectEl.textContent = 'Detected: Devanagari';
+        detectEl.className = 'mono-detect-badge deva';
+        convEl.innerHTML = '';
+      } else {
+        detectEl.textContent = 'Detected: Romanized';
+        detectEl.className = 'mono-detect-badge roman';
+        // Auto-convert preview
+        const converted = translitToDeva(input);
+        convEl.innerHTML = `Convered to: <span>${converted}</span>`;
+      }
+    }
+
+    const VOWEL_SIGNS = {
+      'a': '', 'aa': 'ा', 'i': 'ि', 'ii': 'ी', 'u': 'ु', 'uu': 'ू',
+      'e': 'े', 'ai': 'ै', 'o': 'ो', 'au': 'ौ',
+    };
+
+    function translitToDeva(text) {
+      let result = '';
+      let i = 0;
+      const keys = Object.keys(DEVA_MAP).sort((a, b) => b.length - a.length);
+      const vowelKeys = ['aa', 'ai', 'au', 'a', 'i', 'ii', 'u', 'uu', 'e', 'o'].sort((a, b) => b.length - a.length);
+
+      let lastWasConsonant = false;
+
+      while (i < text.length) {
+        let matched = false;
+
+        // Check for vowel signs if preceded by a consonant
+        if (lastWasConsonant) {
+          for (const vk of vowelKeys) {
+            if (text.substring(i).startsWith(vk)) {
+              result += VOWEL_SIGNS[vk] !== undefined ? VOWEL_SIGNS[vk] : DEVA_MAP[vk];
+              i += vk.length;
+              matched = true;
+              lastWasConsonant = false;
+              break;
+            }
+          }
+        }
+
+        if (!matched) {
+          for (const key of keys) {
+            if (text.substring(i).startsWith(key)) {
+              result += DEVA_MAP[key];
+              i += key.length;
+              matched = true;
+              // Check if it's a consonant (excluding halant)
+              // In DEVA_MAP, consonants are everything except vowels and halant
+              const vowels = ['a', 'aa', 'i', 'ii', 'u', 'uu', 'e', 'ai', 'o', 'au'];
+              lastWasConsonant = !vowels.includes(key) && key !== '*';
+              break;
+            }
+          }
+        }
+
+        if (!matched) {
+          result += text[i];
+          i++;
+          lastWasConsonant = false;
+        }
+      }
+      return result;
+    }
+
+    function monoSyncBgState() {
+      const isTrans = document.getElementById('monoTransparent').checked;
+      const bgInput = document.getElementById('monoBg');
+      if (isTrans) {
+        bgInput.style.opacity = '0.3';
+        bgInput.disabled = true;
+      } else {
+        bgInput.style.opacity = '1';
+        bgInput.disabled = false;
+      }
+    }
+
+    async function monoGenerate() {
+      const text = document.getElementById('monoInput').value.trim();
+      if (!text) return;
+
+      const btn = document.getElementById('btnMonoGen');
+      const statusEl = document.getElementById('monoStatus');
+      const placeholder = document.getElementById('monoPlaceholder');
+      const img = document.getElementById('monoImg');
+      const dlBtn = document.getElementById('btnMonoDl');
+
+      btn.disabled = true;
+      dlBtn.style.display = 'none';
+      setStatus(statusEl, 'running', 'Generating monogram…');
+
+      // Convert if romanized
+      const isDeva = /[\u0900-\u097F]/.test(text);
+      const final_text = isDeva ? text : translitToDeva(text);
+
+      const payload = {
+        text: final_text,
+        font_size: parseInt(document.getElementById('monoFontSize').value),
+        fg_color: document.getElementById('monoFg').value,
+        bg_color: document.getElementById('monoTransparent').checked ? 'transparent' : document.getElementById('monoBg').value,
+        padding: parseInt(document.getElementById('monoPadding').value),
+        vertical: document.getElementById('monoVertical').checked
+      };
+
+      try {
+        const res = await fetch(`${API}/monogram`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Generation failed');
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        img.src = url;
+        img.style.display = 'block';
+        placeholder.style.display = 'none';
+        dlBtn.style.display = 'inline-flex';
+
+        setStatus(statusEl, 'done', '✓ Monogram generated!');
+        
+        // Add to gallery
+        monoAddToGallery(url, text);
+      } catch (e) {
+        setStatus(statusEl, 'error', '✗ ' + e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function monoAddToGallery(url, label) {
+      const gallery = document.getElementById('monoGallery');
+      if (gallery.querySelector('span')) gallery.innerHTML = '';
+      
+      const item = document.createElement('div');
+      item.className = 'char-chip';
+      item.style.minWidth = '100px';
+      item.style.height = 'auto';
+      item.style.padding = '8px';
+      
+      const img = document.createElement('img');
+      img.src = url;
+      img.style.maxHeight = '80px';
+      img.style.maxWidth = '100%';
+      img.style.cursor = 'pointer';
+      img.onclick = () => {
+          document.getElementById('monoImg').src = url;
+          document.getElementById('monoImg').style.display = 'block';
+          document.getElementById('monoPlaceholder').style.display = 'none';
+          document.getElementById('btnMonoDl').style.display = 'inline-flex';
+      };
+      
+      const lbl = document.createElement('div');
+      lbl.textContent = label;
+      lbl.style.fontSize = '0.7rem';
+      lbl.style.marginTop = '4px';
+      lbl.style.color = 'var(--muted)';
+      
+      item.appendChild(img);
+      item.appendChild(lbl);
+      gallery.prepend(item);
+    }
+
+    function monoDownload() {
+      const img = document.getElementById('monoImg');
+      if (!img.src) return;
+      const a = document.createElement('a');
+      a.href = img.src;
+      a.download = 'ranjana_monogram.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function monoReset() {
+      document.getElementById('monoInput').value = '';
+      document.getElementById('monoImg').style.display = 'none';
+      document.getElementById('monoPlaceholder').style.display = 'block';
+      document.getElementById('btnMonoDl').style.display = 'none';
+      document.getElementById('monoTransparent').checked = false;
+      monoSyncBgState();
+      monoOnInput();
+      setStatus(document.getElementById('monoStatus'), '', 'Enter text above and click Generate.');
+    }
+
+    // ── Glyph Studio ──────────────────────────────────────────
+    function glyphPopulateSelect() {
+      const sel = document.getElementById('glyphChar');
+      sel.innerHTML = '';
+      // Only include consonants and vowels for simplicity
+      const labels = Object.keys(DEVA_MAP).filter(k => k !== '*' && !/[0-9]/.test(k));
+      labels.forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = DEVA_MAP[k];
+        opt.textContent = `${k} (${DEVA_MAP[k]})`;
+        sel.appendChild(opt);
+      });
+      glyphLoadConfig();
+    }
+
+    async function glyphLoadConfig() {
+      const char = document.getElementById('glyphChar').value;
+      const type = document.getElementById('glyphType').value;
+      
+      try {
+        const res = await fetch(`${API}/glyphs`);
+        const data = await res.json();
+        const conf = (data[char] && data[char][type]) || { 
+          scale: 1.0, x_offset: 0, y_offset: 0,
+          rotation: 0, skew_x: 0, skew_y: 0,
+          crop_top: 0, crop_bottom: 0, crop_left: 0, crop_right: 0
+        };
+        
+        document.getElementById('glyphScale').value = conf.scale;
+        document.getElementById('glyphX').value = conf.x_offset;
+        document.getElementById('glyphY').value = conf.y_offset;
+        document.getElementById('glyphRot').value = conf.rotation || 0;
+        document.getElementById('glyphSkewX').value = conf.skew_x || 0;
+        document.getElementById('glyphSkewY').value = conf.skew_y || 0;
+        document.getElementById('glyphCropTop').value = conf.crop_top || 0;
+        document.getElementById('glyphCropBottom').value = conf.crop_bottom || 0;
+        document.getElementById('glyphCropLeft').value = conf.crop_left || 0;
+        document.getElementById('glyphCropRight').value = conf.crop_right || 0;
+        
+        // Sync labels
+        document.getElementById('lblGlyphScale').textContent = conf.scale;
+        document.getElementById('lblGlyphX').textContent = conf.x_offset;
+        document.getElementById('lblGlyphY').textContent = conf.y_offset;
+        document.getElementById('lblGlyphRot').textContent = conf.rotation || 0;
+        document.getElementById('lblGlyphSkewX').textContent = conf.skew_x || 0;
+        document.getElementById('lblGlyphSkewY').textContent = conf.skew_y || 0;
+        document.getElementById('lblCropTop').textContent = conf.crop_top || 0;
+        document.getElementById('lblCropBottom').textContent = conf.crop_bottom || 0;
+        document.getElementById('lblCropLeft').textContent = conf.crop_left || 0;
+        document.getElementById('lblCropRight').textContent = conf.crop_right || 0;
+        
+        glyphUpdatePreview();
+      } catch (e) {
+        console.error("Failed to load glyph config", e);
+      }
+    }
+
+    async function glyphUpdatePreview() {
+      const char = document.getElementById('glyphChar').value;
+      const type = document.getElementById('glyphType').value;
+      const scale = document.getElementById('glyphScale').value;
+      const x = document.getElementById('glyphX').value;
+      const y = document.getElementById('glyphY').value;
+      const rot = document.getElementById('glyphRot').value;
+      const sx = document.getElementById('glyphSkewX').value;
+      const sy = document.getElementById('glyphSkewY').value;
+      const ct = document.getElementById('glyphCropTop').value;
+      const cb = document.getElementById('glyphCropBottom').value;
+      const cl = document.getElementById('glyphCropLeft').value;
+      const cr = document.getElementById('glyphCropRight').value;
+      
+      // Update labels
+      document.getElementById('lblGlyphScale').textContent = scale;
+      document.getElementById('lblGlyphX').textContent = x;
+      document.getElementById('lblGlyphY').textContent = y;
+      document.getElementById('lblGlyphRot').textContent = rot;
+      document.getElementById('lblGlyphSkewX').textContent = sx;
+      document.getElementById('lblGlyphSkewY').textContent = sy;
+      document.getElementById('lblCropTop').textContent = ct;
+      document.getElementById('lblCropBottom').textContent = cb;
+      document.getElementById('lblCropLeft').textContent = cl;
+      document.getElementById('lblCropRight').textContent = cr;
+
+      const payload = {
+        char: char,
+        type: type,
+        scale: parseFloat(scale),
+        x_offset: parseInt(x),
+        y_offset: parseInt(y),
+        rotation: parseFloat(rot),
+        skew_x: parseFloat(sx),
+        skew_y: parseFloat(sy),
+        crop_top: parseInt(ct),
+        crop_bottom: parseInt(cb),
+        crop_left: parseInt(cl),
+        crop_right: parseInt(cr)
+      };
+
+      try {
+        const res = await fetch(`${API}/glyphs/preview`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const blob = await res.blob();
+        document.getElementById('glyphPreviewImg').src = URL.createObjectURL(blob);
+      } catch (e) {
+        console.error("Preview failed", e);
+      }
+    }
+
+    async function glyphSaveConfig() {
+      const char = document.getElementById('glyphChar').value;
+      const type = document.getElementById('glyphType').value;
+      const statusEl = document.getElementById('glyphStatus');
+      
+      const payload = {
+        char: char,
+        type: type,
+        scale: parseFloat(document.getElementById('glyphScale').value),
+        x_offset: parseInt(document.getElementById('glyphX').value),
+        y_offset: parseInt(document.getElementById('glyphY').value),
+        rotation: parseFloat(document.getElementById('glyphRot').value),
+        skew_x: parseFloat(document.getElementById('glyphSkewX').value),
+        skew_y: parseFloat(document.getElementById('glyphSkewY').value),
+        crop_top: parseInt(document.getElementById('glyphCropTop').value),
+        crop_bottom: parseInt(document.getElementById('glyphCropBottom').value),
+        crop_left: parseInt(document.getElementById('glyphCropLeft').value),
+        crop_right: parseInt(document.getElementById('glyphCropRight').value)
+      };
+
+      statusEl.textContent = "Saving...";
+      try {
+        const res = await fetch(`${API}/glyphs/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          statusEl.innerHTML = "<span>✓ Saved successfully!</span>";
+          setTimeout(() => statusEl.textContent = "", 2000);
+        }
+      } catch (e) {
+        statusEl.textContent = "Error saving config";
+      }
+    }
+
+    // ── Ligature Studio ───────────────────────────────────────
+    let ligSlots = [];
+
+    function ligPopulateSelects() {
+      // Initialize with 2 slots
+      ligClearSlots();
+      ligAddSlot(DEVA_MAP['k']);
+      ligAddSlot(DEVA_MAP['r']);
+    }
+
+    function ligAddSlot(initialValue = '', config = null) {
+      const container = document.getElementById('ligSequenceBuilder');
+      const slotId = 'ligSlot_' + Date.now() + Math.random().toString(36).substr(2, 5);
+      
+      const wrapper = document.createElement('div');
+      wrapper.id = slotId;
+      wrapper.className = 'lig-slot-wrapper';
+      wrapper.style.marginBottom = '12px';
+      wrapper.style.padding = '12px';
+      wrapper.style.border = '1px solid var(--border)';
+      wrapper.style.borderRadius = '8px';
+      wrapper.style.background = 'rgba(255,255,255,0.03)';
+      wrapper.style.position = 'relative';
+
+      const topRow = document.createElement('div');
+      topRow.style.display = 'flex';
+      topRow.style.gap = '10px';
+      topRow.style.alignItems = 'center';
+      topRow.style.justifyContent = 'space-between';
+      topRow.style.width = '100%';
+
+      const leftGroup = document.createElement('div');
+      leftGroup.style.display = 'flex';
+      leftGroup.style.alignItems = 'center';
+      leftGroup.style.gap = '10px';
+
+      const sel = document.createElement('select');
+      sel.className = 'mono-input lig-char-select';
+      sel.style.width = '120px';
+      sel.style.fontFamily = "'NithyaRanjanaDU-Regular', sans-serif";
+      sel.style.fontSize = '1.4rem';
+      
+      const ranjanaPreview = document.createElement('span');
+      ranjanaPreview.style.fontFamily = "'NithyaRanjanaDU-Regular', sans-serif";
+      ranjanaPreview.style.fontSize = '2.4rem';
+      ranjanaPreview.style.width = '50px';
+      ranjanaPreview.style.textAlign = 'center';
+      ranjanaPreview.style.color = 'var(--accent2)';
+      ranjanaPreview.textContent = initialValue || '्';
+
+      sel.onchange = () => { 
+        ranjanaPreview.textContent = sel.value;
+        ligUpdateSequence(); 
+      };
+
+      const labels = Object.keys(DEVA_MAP).filter(k => k !== '*' && !/[0-9]/.test(k));
+      const halantOpt = document.createElement('option');
+      halantOpt.value = '्';
+      halantOpt.textContent = '् (Halant)';
+      sel.appendChild(halantOpt);
+
+      labels.forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = DEVA_MAP[k];
+        opt.textContent = DEVA_MAP[k];
+        sel.appendChild(opt);
+      });
+      if (initialValue) sel.value = initialValue;
+
+      leftGroup.appendChild(sel);
+      leftGroup.appendChild(ranjanaPreview);
+
+      const rightGroup = document.createElement('div');
+      rightGroup.style.display = 'flex';
+      rightGroup.style.alignItems = 'center';
+      rightGroup.style.gap = '4px';
+
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'btn btn-ghost';
+      toggleBtn.style.padding = '8px 12px';
+      toggleBtn.textContent = '⚙️';
+      toggleBtn.title = 'Settings';
+      toggleBtn.onclick = () => {
+          const panel = wrapper.querySelector('.lig-settings-panel');
+          const isVisible = panel.style.display === 'block';
+          document.querySelectorAll('.lig-settings-panel').forEach(p => p.style.display = 'none');
+          panel.style.display = isVisible ? 'none' : 'block';
+          
+          if (!isVisible) {
+              activeSlotId = slotId;
+              document.getElementById('ligActiveIndicator').style.display = 'block';
+              document.getElementById('ligActiveChar').textContent = sel.value;
+          } else {
+              activeSlotId = null;
+              document.getElementById('ligActiveIndicator').style.display = 'none';
+          }
+          updateToolbarStyles();
+      };
+
+      const delBtn = document.createElement('button');
+      delBtn.innerHTML = '✕';
+      delBtn.className = 'btn btn-ghost';
+      delBtn.style.color = 'var(--error)';
+      delBtn.style.padding = '8px 12px';
+      delBtn.onclick = () => { wrapper.remove(); ligUpdateSequence(); };
+
+      rightGroup.appendChild(toggleBtn);
+      rightGroup.appendChild(delBtn);
+
+      topRow.appendChild(leftGroup);
+      topRow.appendChild(rightGroup);
+      wrapper.appendChild(topRow);
+
+      // Settings Panel
+      const settings = config || {
+          scale: 1.0, x_offset: 0, y_offset: 0, rotation: 0,
+          skew_x: 0, skew_y: 0, crop_top: 0, crop_bottom: 0, crop_left: 0, crop_right: 0
+      };
+
+      const panel = document.createElement('div');
+      panel.className = 'lig-settings-panel';
+      panel.style.display = config ? 'block' : 'none';
+      panel.style.marginTop = '12px';
+      panel.style.paddingTop = '12px';
+      panel.style.borderTop = '1px solid var(--border)';
+
+      const createSlider = (label, id, min, max, step, val, unit = '') => {
+          const div = document.createElement('div');
+          div.className = 'mono-field';
+          div.style.marginBottom = '8px';
+          const displayVal = val === null ? 'Default' : val;
+          div.innerHTML = `
+            <label class="mono-label" style="font-size:0.75rem;">${label}: <span class="val">${displayVal}</span>${unit}</label>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="range" class="mono-slider lig-slider" data-prop="${id}" min="${min}" max="${max}" step="${step}" value="${val === null ? (max+min)/2 : val}">
+            </div>
+          `;
+          const input = div.querySelector('input');
+          input.oninput = (e) => {
+              div.querySelector('.val').textContent = e.target.value;
+              ligUpdatePreview();
+          };
+          return div;
+      };
+
+      const createMoveGroup = () => {
+          const div = document.createElement('div');
+          div.style.display = 'flex';
+          div.style.gap = '8px';
+          div.style.margin = '10px 0';
+          div.style.justifyContent = 'center';
+          div.innerHTML = `<label class="mono-label" style="width:100%; text-align:center; margin-bottom:4px;">Nudge Position</label>`;
+          
+          const btnStyle = "padding:4px 12px; font-size:1.1rem; min-width:44px;";
+          
+          const left = document.createElement('button');
+          left.className = 'btn btn-ghost'; left.style = btnStyle; left.textContent = '←';
+          left.onclick = () => { const s = panel.querySelector('[data-prop="x_offset"]'); s.value = parseInt(s.value)-1; s.dispatchEvent(new Event('input')); };
+          
+          const up = document.createElement('button');
+          up.className = 'btn btn-ghost'; up.style = btnStyle; up.textContent = '↑';
+          up.onclick = () => { const s = panel.querySelector('[data-prop="y_offset"]'); s.value = parseInt(s.value)-1; s.dispatchEvent(new Event('input')); };
+          
+          const down = document.createElement('button');
+          down.className = 'btn btn-ghost'; down.style = btnStyle; down.textContent = '↓';
+          down.onclick = () => { const s = panel.querySelector('[data-prop="y_offset"]'); s.value = parseInt(s.value)+1; s.dispatchEvent(new Event('input')); };
+          
+          const right = document.createElement('button');
+          right.className = 'btn btn-ghost'; right.style = btnStyle; right.textContent = '→';
+          right.onclick = () => { const s = panel.querySelector('[data-prop="x_offset"]'); s.value = parseInt(s.value)+1; s.dispatchEvent(new Event('input')); };
+          
+          div.appendChild(left);
+          div.appendChild(up);
+          div.appendChild(down);
+          div.appendChild(right);
+          return div;
+      };
+
+      panel.appendChild(createSlider('Scale', 'scale', 0.5, 2.0, 0.05, settings.scale, 'x'));
+      panel.appendChild(createSlider('X-Offset', 'x_offset', -100, 100, 1, settings.x_offset, 'px'));
+      panel.appendChild(createSlider('Y-Offset', 'y_offset', -100, 100, 1, settings.y_offset, 'px'));
+      panel.appendChild(createMoveGroup());
+      panel.appendChild(createSlider('Y-Advance', 'y_advance', 0, 150, 1, settings.y_advance !== undefined ? settings.y_advance : 80, 'px'));
+      panel.appendChild(createSlider('Rotation', 'rotation', -180, 180, 1, settings.rotation, '°'));
+      panel.appendChild(createSlider('Skew X', 'skew_x', -1.0, 1.0, 0.05, settings.skew_x));
+      panel.appendChild(createSlider('Skew Y', 'skew_y', -1.0, 1.0, 0.05, settings.skew_y));
+      panel.appendChild(createSlider('Crop Top', 'crop_top', 0, 100, 1, settings.crop_top, 'px'));
+      panel.appendChild(createSlider('Crop Bottom', 'crop_bottom', 0, 100, 1, settings.crop_bottom, 'px'));
+      panel.appendChild(createSlider('Crop Left', 'crop_left', 0, 100, 1, settings.crop_left, 'px'));
+      panel.appendChild(createSlider('Crop Right', 'crop_right', 0, 100, 1, settings.crop_right, 'px'));
+
+      wrapper.appendChild(panel);
+      container.appendChild(wrapper);
+      
+      ligUpdateSequence();
+    }
+
+
+    function ligClearSlots() {
+      document.getElementById('ligSequenceBuilder').innerHTML = '';
+      ligUpdateSequence();
+    }
+
+    function ligUpdateSequence() {
+      const container = document.getElementById('ligSequenceBuilder');
+      const wrappers = container.querySelectorAll('.lig-slot-wrapper');
+      const chars = Array.from(wrappers).map(w => w.querySelector('.lig-char-select').value);
+      
+      document.getElementById('ligFullSequence').textContent = chars.join('');
+      
+      const romanParts = chars.map(c => {
+          const entry = Object.entries(DEVA_MAP).find(([k, v]) => v === c);
+          return entry ? entry[0] : '?';
+      });
+      document.getElementById('ligRomanSequence').textContent = romanParts.join(' + ');
+      
+      ligUpdatePreview();
+    }
+
+    async function ligUpdatePreview() {
+      const container = document.getElementById('ligSequenceBuilder');
+      const wrappers = container.querySelectorAll('.lig-slot-wrapper');
+      
+      const img = document.getElementById('ligPreviewImg');
+      const placeholder = document.getElementById('ligPreviewPlaceholder');
+
+      if (wrappers.length === 0) {
+          img.style.display = 'none';
+          placeholder.style.display = 'block';
+          return;
+      }
+
+      const chars = [];
+      wrappers.forEach(wrapper => {
+          const char = wrapper.querySelector('.lig-char-select').value;
+          const sliders = wrapper.querySelectorAll('.lig-slider');
+          const config = { 
+              char: char,
+              mask: wrapper.maskData || null,
+              adjustments: wrapper.adjustments || []
+          };
+          sliders.forEach(s => config[s.dataset.prop] = parseFloat(s.value));
+          chars.push(config);
+      });
+
+      const payload = {
+        sequence: chars.map(c => c.char).join('+'),
+        chars: chars,
+        mask: null, // Global mask reset
+        adjustments: [] // Global adjustments reset
+      };
+
+      try {
+        const res = await fetch(`${API}/ligatures/preview`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Preview failed");
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        img.src = url;
+        img.onload = () => {
+           img.style.display = 'block';
+           placeholder.style.display = 'none';
+           document.getElementById('ligToolbar').style.display = 'flex';
+           initLigCorrectionCanvas();
+        };
+      } catch (e) {
+        console.error("Ligature preview failed", e);
+      }
+    }
+
+    let activeSlotId = null;
+    let ligEraseMode = false;
+    let ligSelectMode = false;
+    let ligExtendMode = false;
+    let isDrawing = false;
+    let isSelecting = false;
+    let isMoving = false;
+    let isExtending = false;
+    let selectionRect = null;
+
+    const ligMaskCanvas = document.getElementById('ligCorrectionCanvas');
+    const ligMaskCtx = ligMaskCanvas.getContext('2d');
+    const ligOverlayCanvas = document.getElementById('ligOverlayCanvas');
+    const ligOverlayCtx = ligOverlayCanvas.getContext('2d');
+
+    function initLigCorrectionCanvas() {
+        const img = document.getElementById('ligPreviewImg');
+        ligMaskCanvas.width = img.naturalWidth || img.clientWidth;
+        ligMaskCanvas.height = img.naturalHeight || img.clientHeight;
+        ligOverlayCanvas.width = ligMaskCanvas.width;
+        ligOverlayCanvas.height = ligMaskCanvas.height;
+        
+        // When we switch active character, we should ideally load THEIR mask onto the canvas.
+        // But the canvas is global. So we'll clear and redraw if needed, or just draw fresh.
+        if (activeSlotId) {
+            const wrapper = document.getElementById(activeSlotId);
+            if (wrapper.maskData) {
+                const tempImg = new Image();
+                tempImg.onload = () => {
+                    ligMaskCtx.fillStyle = 'white';
+                    ligMaskCtx.fillRect(0,0,ligMaskCanvas.width,ligMaskCanvas.height);
+                    ligMaskCtx.drawImage(tempImg, 0, 0);
+                };
+                tempImg.src = wrapper.maskData;
+            } else {
+                ligMaskCtx.fillStyle = 'white';
+                ligMaskCtx.fillRect(0,0,ligMaskCanvas.width,ligMaskCanvas.height);
+            }
+        }
+    }
+
+    document.getElementById('ligEraseBtn').onclick = (e) => {
+        ligEraseMode = !ligEraseMode;
+        ligSelectMode = false; ligExtendMode = false;
+        updateToolbarStyles();
+    };
+
+    document.getElementById('ligSelectBtn').onclick = (e) => {
+        ligSelectMode = !ligSelectMode;
+        ligEraseMode = false; ligExtendMode = false;
+        updateToolbarStyles();
+    };
+
+    document.getElementById('ligExtendBtn').onclick = (e) => {
+        ligExtendMode = !ligExtendMode;
+        ligEraseMode = false; ligSelectMode = false;
+        updateToolbarStyles();
+    };
+
+    function updateToolbarStyles() {
+        const eBtn = document.getElementById('ligEraseBtn');
+        const sBtn = document.getElementById('ligSelectBtn');
+        const exBtn = document.getElementById('ligExtendBtn');
+        const nGrp = document.getElementById('ligNudgeGroup');
+        
+        eBtn.style.background = ligEraseMode ? 'var(--accent)' : '';
+        eBtn.style.color = ligEraseMode ? 'white' : '';
+        sBtn.style.background = ligSelectMode ? 'var(--accent)' : '';
+        sBtn.style.color = ligSelectMode ? 'white' : '';
+        exBtn.style.background = ligExtendMode ? 'var(--accent)' : '';
+        exBtn.style.color = ligExtendMode ? 'white' : '';
+        
+        nGrp.style.display = (ligSelectMode || ligExtendMode) ? 'flex' : 'none';
+        ligMaskCanvas.style.display = (ligEraseMode || ligSelectMode || ligExtendMode) ? 'block' : 'none';
+        ligOverlayCanvas.style.display = (ligEraseMode || ligSelectMode || ligExtendMode) ? 'block' : 'none';
+    }
+
+    function ligNudgeSelection(dx, dy) {
+        if (!selectionRect) {
+            // If no active selection, look at the last adjustment
+            if (ligManualAdjustments.length > 0) {
+                const adj = ligManualAdjustments[ligManualAdjustments.length-1];
+                adj.dx += dx;
+                adj.dy += dy;
+                ligUpdatePreview();
+            }
+            return;
+        }
+        selectionRect.dx = (selectionRect.dx || 0) + dx;
+        selectionRect.dy = (selectionRect.dy || 0) + dy;
+        drawSelectionOverlay();
+    }
+
+    document.getElementById('ligClearEraseBtn').onclick = () => {
+        ligMaskCtx.fillStyle = 'white';
+        ligMaskCtx.fillRect(0, 0, ligMaskCanvas.width, ligMaskCanvas.height);
+        ligManualAdjustments = [];
+        selectionRect = null;
+        ligUpdatePreview();
+    };
+
+    ligMaskCanvas.onmousedown = (e) => {
+        if (!activeSlotId) return;
+        const rect = ligMaskCanvas.getBoundingClientRect();
+        const scaleX = ligMaskCanvas.width / rect.width;
+        const scaleY = ligMaskCanvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+
+        if (ligEraseMode) {
+            isDrawing = true;
+            drawAt(x, y);
+        } else if (ligSelectMode || ligExtendMode) {
+            // Check if clicking inside current selection to move/extend
+            if (selectionRect && x >= selectionRect.x + (selectionRect.dx||0) && x <= selectionRect.x + (selectionRect.dx||0) + selectionRect.w &&
+                y >= selectionRect.y + (selectionRect.dy||0) && y <= selectionRect.y + (selectionRect.dy||0) + selectionRect.h) {
+                if (ligSelectMode) isMoving = true;
+                else if (ligExtendMode) isExtending = true;
+            } else {
+                isSelecting = true;
+                selectionRect = { x, y, w: 0, h: 0, dx: 0, dy: 0, ow: 0, oh: 0 };
+            }
+        }
+    };
+
+    ligMaskCanvas.onmousemove = (e) => {
+        if (!activeSlotId) return;
+        const rect = ligMaskCanvas.getBoundingClientRect();
+        const scaleX = ligMaskCanvas.width / rect.width;
+        const scaleY = ligMaskCanvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+
+        if (isDrawing) drawAt(x, y);
+        if (isSelecting) {
+            selectionRect.w = x - selectionRect.x;
+            selectionRect.h = y - selectionRect.y;
+            selectionRect.ow = selectionRect.w;
+            selectionRect.oh = selectionRect.h;
+            drawSelectionOverlay();
+        }
+        if (isMoving) {
+            const dx = e.movementX * scaleX;
+            const dy = e.movementY * scaleY;
+            selectionRect.dx = (selectionRect.dx || 0) + dx;
+            selectionRect.dy = (selectionRect.dy || 0) + dy;
+            drawSelectionOverlay();
+        }
+        if (isExtending) {
+            const dw = e.movementX * scaleX;
+            const dh = e.movementY * scaleY;
+            selectionRect.w += dw;
+            selectionRect.h += dh;
+            drawSelectionOverlay();
+        }
+    };
+
+    ligMaskCanvas.onmouseup = () => {
+        if (!activeSlotId) return;
+        const wrapper = document.getElementById(activeSlotId);
+        if (isDrawing) { 
+            isDrawing = false; 
+            ligMaskCtx.beginPath(); 
+            wrapper.maskData = ligMaskCanvas.toDataURL();
+            ligUpdatePreview(); 
+        }
+        if (isSelecting) {
+            isSelecting = false;
+            if (Math.abs(selectionRect.w) < 5) selectionRect = null;
+            else {
+                if (selectionRect.w < 0) { selectionRect.x += selectionRect.w; selectionRect.w = Math.abs(selectionRect.w); }
+                if (selectionRect.h < 0) { selectionRect.y += selectionRect.h; selectionRect.h = Math.abs(selectionRect.h); }
+                selectionRect.ow = selectionRect.w; selectionRect.oh = selectionRect.h;
+            }
+            drawSelectionOverlay();
+        }
+        if (isMoving || isExtending) {
+            const wasMoving = isMoving;
+            isMoving = false; isExtending = false;
+            if (wasMoving) {
+                ligMaskCtx.fillStyle = 'black';
+                ligMaskCtx.fillRect(selectionRect.x, selectionRect.y, selectionRect.w, selectionRect.h);
+                wrapper.maskData = ligMaskCanvas.toDataURL();
+            }
+            wrapper.adjustments = wrapper.adjustments || [];
+            wrapper.adjustments.push({
+                x: selectionRect.x, y: selectionRect.y, 
+                ow: selectionRect.ow, oh: selectionRect.oh,
+                fw: selectionRect.w, fh: selectionRect.h,
+                dx: selectionRect.dx || 0, dy: selectionRect.dy || 0,
+                mode: wasMoving ? 'move' : 'extend'
+            });
+            selectionRect = null;
+            ligUpdatePreview();
+        }
+    };
+
+    function drawAt(x, y) {
+        ligMaskCtx.lineWidth = document.getElementById('ligEraseSize').value;
+        ligMaskCtx.lineCap = 'round';
+        ligMaskCtx.strokeStyle = 'black'; 
+        ligMaskCtx.lineTo(x, y);
+        ligMaskCtx.stroke();
+        ligMaskCtx.beginPath();
+        ligMaskCtx.moveTo(x, y);
+    }
+
+    async function ligInjectDataset() {
+        const container = document.getElementById('ligSequenceBuilder');
+        const wrappers = container.querySelectorAll('.lig-slot-wrapper');
+        const chars = [];
+        wrappers.forEach(wrapper => {
+            const char = wrapper.querySelector('.lig-char-select').value;
+            const sliders = wrapper.querySelectorAll('.lig-slider');
+            const config = { 
+                char: char,
+                mask: wrapper.maskData || null,
+                adjustments: wrapper.adjustments || []
+            };
+            sliders.forEach(s => config[s.dataset.prop] = parseFloat(s.value));
+            chars.push(config);
+        });
+
+        const payload = {
+            sequence: chars.map(c => c.char).join('+'),
+            chars: chars,
+            mask: null,
+            adjustments: []
+        };
+
+        try {
+            const res = await fetch(`${API}/ligatures/inject`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            alert(data.message || data.error);
+        } catch (e) {
+            alert("Injection failed: " + e.message);
+        }
+    }
+
+    async function ligSaveConfig() {
+      const container = document.getElementById('ligSequenceBuilder');
+      const wrappers = container.querySelectorAll('.lig-slot-wrapper');
+      
+      const chars = [];
+      wrappers.forEach(wrapper => {
+          const char = wrapper.querySelector('.lig-char-select').value;
+          const sliders = wrapper.querySelectorAll('.lig-slider');
+          const config = { char: char };
+          sliders.forEach(s => config[s.dataset.prop] = parseFloat(s.value));
+          chars.push(config);
+      });
+
+      const seq = chars.map(c => c.char).join('+');
+      
+      if (!seq || chars.length < 2) {
+          alert("Please add at least 2 characters for a ligature.");
+          return;
+      }
+
+      const payload = {
+        sequence: seq,
+        chars: chars,
+        mask: ligMaskCanvas.toDataURL(),
+        adjustments: ligManualAdjustments
+      };
+
+      const statusEl = document.getElementById('ligStatus');
+      statusEl.textContent = "Saving...";
+
+      try {
+        const res = await fetch(`${API}/ligatures/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          statusEl.innerHTML = "<span>✓ Rule saved!</span>";
+          ligLoadRules();
+          setTimeout(() => statusEl.textContent = "", 2000);
+        }
+      } catch (e) {
+        statusEl.textContent = "Error saving ligature";
+      }
+    }
+
+    async function ligLoadRules() {
+      try {
+        const res = await fetch(`${API}/ligatures`);
+        const data = await res.json();
+        const list = document.getElementById('ligList');
+        list.innerHTML = '';
+        
+        Object.keys(data).forEach(seq => {
+          const chip = document.createElement('div');
+          chip.className = 'char-chip';
+          chip.style.padding = '12px';
+          chip.style.textAlign = 'center';
+          
+          const ranjanaSeq = seq.split('+').join('');
+          
+          chip.innerHTML = `
+            <div style="font-family: 'NithyaRanjanaDU-Regular'; font-size: 1.8rem; margin-bottom: 4px;">${ranjanaSeq}</div>
+            <div style="font-size:0.65rem; color:var(--muted);">${seq}</div>
+            <div style="font-size:0.7rem; color:var(--accent1); font-weight:bold; margin-top:4px;">${data[seq].y_offset_overlap}px overlap</div>
+          `;
+          chip.onclick = () => {
+            const parts = seq.split('+');
+            ligClearSlots();
+            const configs = data[seq]; // Now an array
+            parts.forEach((p, i) => ligAddSlot(p, configs[i]));
+            ligUpdateSequence();
+          };
+          list.appendChild(chip);
+        });
+      } catch (e) {
+        console.error("Failed to load ligatures", e);
+      }
+    }
+
+    // ── Init ──────────────────────────────────────────────────
+    refreshStatus();
+    glyphPopulateSelect();
+    ligPopulateSelects();
+    ligLoadRules();
+    setInterval(refreshStatus, 5000);
+  </script>
+</body>
+
+</html>
