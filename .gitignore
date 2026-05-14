@@ -7,10 +7,8 @@ env/
 __pycache__/
 *.pyc
 *.pyo
-*.pkl
 
 # Dataset (large binary files)
-dataset_pycache_static/dataset/
 
 # Server logs
 server.log
