@@ -688,9 +688,9 @@ async def generate_monogram(req: MonogramRequest):
     # If ANY cluster carries a vowel-sign matra, strip ALL matras from every cluster
     # and record which matra + position to render as one shared glyph spanning the stack.
     MATRA_POS = {
-        '\u093E': 'right',   # aa ा
-        '\u093F': 'left',    # i  ि
+        '\u093F': 'left',    # i  ि (Superior in stack)
         '\u0940': 'right',   # ii ी
+        '\u093E': 'right',   # aa ा
         '\u0941': 'below',   # u  ु
         '\u0942': 'below',   # uu ू
         '\u0947': 'above',   # e  े
@@ -700,14 +700,12 @@ async def generate_monogram(req: MonogramRequest):
     }
     shared_matra = None
     shared_matra_pos = None
-    for ln in lines:
-        for m_ch, m_p in MATRA_POS.items():
-            if m_ch in ln:
-                shared_matra = m_ch
-                shared_matra_pos = m_p
-                break
-        if shared_matra:
+    for m_ch, m_p in MATRA_POS.items():
+        if any(m_ch in ln for ln in lines):
+            shared_matra = m_ch
+            shared_matra_pos = m_p
             break
+            
     if shared_matra:
         lines = [''.join(ch for ch in ln if ch not in MATRA_POS) for ln in lines]
 
@@ -1043,10 +1041,111 @@ async def generate_monogram(req: MonogramRequest):
                         peak_x = max(range(bb_s[0], bb_s[2]), key=lambda x: col_alpha[x])
                         # Find first zero column AFTER the peak — this is the gap before dotted circle
                         gap_x = bb_s[2]
+
                         for x in range(peak_x + 1, tw):
+
                             if col_alpha[x] == 0:
+
                                 gap_x = x
+
                                 break
+
+                                
+
+                        if matra_char == '\u093F':
+
+                            import numpy as np
+
+                            from collections import Counter
+
+                            arr = np.array(temp_s)
+
+                            draw = ImageDraw.Draw(temp_s)
+
+                            
+
+                            # 1. Erase left decorative dots
+
+                            left_edges = []
+
+                            for y in range(bb_s[1] + 20, bb_s[3]):
+
+                                row = arr[y, bb_s[0]:bb_s[2], 3]
+
+                                nonzero = np.where(row > 0)[0]
+
+                                if len(nonzero) > 0:
+
+                                    left_edges.append(bb_s[0] + nonzero[0])
+
+                            if left_edges:
+
+                                stem_left_x = Counter(left_edges).most_common(1)[0][0]
+
+                                draw.rectangle([(0, bb_s[1] + 20), (int(stem_left_x) - 1, bb_s[3])], fill=(0,0,0,0))
+
+                                
+
+                            # 2. Erase right dotted circle completely
+
+                            dip_x = peak_x
+
+                            min_alpha = col_alpha[peak_x]
+
+                            for x in range(peak_x, bb_s[2]):
+
+                                if col_alpha[x] < min_alpha:
+
+                                    min_alpha = col_alpha[x]
+
+                                    dip_x = x
+
+                                elif col_alpha[x] > min_alpha * 1.5 and col_alpha[x] > 3000:
+
+                                    break
+
+                                    
+
+                            arch_bottom_y = bb_s[1]
+
+                            found_top = False
+
+                            for y in range(bb_s[1], bb_s[3]):
+
+                                if s_pix[dip_x, y][3] > 0:
+
+                                    found_top = True
+
+                                elif found_top and s_pix[dip_x, y][3] == 0:
+
+                                    arch_bottom_y = y
+
+                                    break
+
+                                    
+
+                            draw.rectangle([(dip_x, arch_bottom_y), (tw, th)], fill=(0,0,0,0))
+
+                            
+
+                            # Recalculate gap_x to be the absolute right edge of the arch
+
+                            c_alpha = [sum(s_pix[x, y][3] for y in range(th)) for x in range(tw)]
+
+                            end_x = bb_s[2]
+
+                            for x in range(tw - 1, peak_x, -1):
+
+                                if c_alpha[x] > 0:
+
+                                    end_x = x
+
+                                    break
+
+                            gap_x = end_x + 1
+
+                        
+
                         # Crop to pure ikar arch only
                         pure_ikar = Image.new('RGBA', (tw, th), (0,0,0,0))
                         pure_ikar.paste(temp_s.crop((0, 0, gap_x, th)), (0, 0))
@@ -1074,7 +1173,7 @@ async def generate_monogram(req: MonogramRequest):
                         if shared_matra_pos == 'left':
                             # Place the ikar arch completely to the LEFT of the consonant stack,
                             # with a small visual gap — matching how long-ii appears on the right.
-                            paste_x = first_char_origin_x - matra_glyph.width - 4
+                            paste_x = first_char_origin_x - matra_glyph.width + 8
                         else:
                             paste_x = first_char_origin_x + dx
                         paste_y = first_char_origin_y + dy
