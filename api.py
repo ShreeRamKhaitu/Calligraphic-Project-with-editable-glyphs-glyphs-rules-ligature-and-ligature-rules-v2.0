@@ -2,7 +2,7 @@ import os
 import io
 import numpy as np
 import joblib
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageChops
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -463,13 +463,10 @@ async def preview_ligature(req: LigatureSaveRequest):
         except Exception as e:
             print(f"Layer failed: {e}")
 
-    # Do not crop tightly to prevent browser shifting
+    # Do not crop tightly to prevent coordinate shifting for surgical tools
     bbox = img.getbbox()
     if not bbox:
         img = Image.new("RGBA", (400, 200), (0,0,0,0))
-    else:
-        # Keep fixed width 400, crop vertical but retain some padding
-        img = img.crop((0, max(0, bbox[1]-20), 400, min(img.height, bbox[3]+20)))
 
     # Apply Global Mask (Legacy)
     if req.mask:
@@ -694,6 +691,7 @@ async def generate_monogram(req: MonogramRequest):
             lig_layer_h = (len(char_configs) * (req.font_size + req.line_spacing)) + 100
             lig_layer = Image.new("RGBA", (total_width + 100, lig_layer_h), (0,0,0,0))
             lig_y_cursor = 0
+            studio_y_cursor = 50
             
             for char_idx, override in enumerate(char_configs):
                 display_text = override["char"]
@@ -744,10 +742,13 @@ async def generate_monogram(req: MonogramRequest):
                 char_img = char_temp.crop((tx + bb[0], ty + bb[1], tx + bb[2], ty + bb[3]))
                 
                 # Apply Ligature Studio surgical tools by projecting back from studio coordinates
-                cw = bb[2] - bb[0]
-                ch = bb[3] - bb[1]
-                bbox_x = (400 - (cw + 200)) // 2 + x_off + 100
-                bbox_y = studio_y_cursor + y_off + 100
+                studio_font = ImageFont.truetype(font_path, int(100 * scale))
+                studio_bb = studio_font.getbbox(display_text)
+                cw_studio = studio_bb[2] - studio_bb[0]
+                ch_studio = studio_bb[3] - studio_bb[1]
+                
+                bbox_x = (400 - (cw_studio + 200)) // 2 + override.get("x_offset", 0) + 100
+                bbox_y = studio_y_cursor + override.get("y_offset", 0) + 100
 
                 c_mask = override.get("mask")
                 if c_mask:
@@ -788,8 +789,10 @@ async def generate_monogram(req: MonogramRequest):
                 y_adv = override.get("y_advance")
                 if y_adv is not None:
                     lig_y_cursor += int(y_adv * scale_factor)
+                    studio_y_cursor += int(y_adv)
                 else:
                     lig_y_cursor += line_height + req.line_spacing
+                    studio_y_cursor += ch_studio + 20
 
             # Crop the finished ligature layer to content
             l_bbox = lig_layer.getbbox()

@@ -2224,6 +2224,11 @@
           skew_x: 0, skew_y: 0, crop_top: 0, crop_bottom: 0, crop_left: 0, crop_right: 0
       };
 
+      if (config) {
+          wrapper.maskData = config.mask || null;
+          wrapper.adjustments = config.adjustments || [];
+      }
+
       const panel = document.createElement('div');
       panel.className = 'lig-settings-panel';
       panel.style.display = config ? 'block' : 'none';
@@ -2453,16 +2458,21 @@
         nGrp.style.display = (ligSelectMode || ligExtendMode) ? 'flex' : 'none';
         ligMaskCanvas.style.display = (ligEraseMode || ligSelectMode || ligExtendMode) ? 'block' : 'none';
         ligOverlayCanvas.style.display = (ligEraseMode || ligSelectMode || ligExtendMode) ? 'block' : 'none';
+        ligMaskCanvas.style.cursor = ligEraseMode ? 'none' : 'crosshair';
     }
 
     function ligNudgeSelection(dx, dy) {
         if (!selectionRect) {
             // If no active selection, look at the last adjustment
-            if (ligManualAdjustments.length > 0) {
-                const adj = ligManualAdjustments[ligManualAdjustments.length-1];
-                adj.dx += dx;
-                adj.dy += dy;
-                ligUpdatePreview();
+            if (activeSlotId) {
+                const wrapper = document.getElementById(activeSlotId);
+                const adjustments = wrapper.adjustments || [];
+                if (adjustments.length > 0) {
+                    const adj = adjustments[adjustments.length - 1];
+                    adj.dx += dx;
+                    adj.dy += dy;
+                    ligUpdatePreview();
+                }
             }
             return;
         }
@@ -2474,8 +2484,13 @@
     document.getElementById('ligClearEraseBtn').onclick = () => {
         ligMaskCtx.fillStyle = 'white';
         ligMaskCtx.fillRect(0, 0, ligMaskCanvas.width, ligMaskCanvas.height);
-        ligManualAdjustments = [];
+        if (activeSlotId) {
+            const wrapper = document.getElementById(activeSlotId);
+            wrapper.maskData = null;
+            wrapper.adjustments = [];
+        }
         selectionRect = null;
+        drawSelectionOverlay();
         ligUpdatePreview();
     };
 
@@ -2494,8 +2509,8 @@
             // Check if clicking inside current selection to move/extend
             if (selectionRect && x >= selectionRect.x + (selectionRect.dx||0) && x <= selectionRect.x + (selectionRect.dx||0) + selectionRect.w &&
                 y >= selectionRect.y + (selectionRect.dy||0) && y <= selectionRect.y + (selectionRect.dy||0) + selectionRect.h) {
-                if (ligSelectMode) isMoving = true;
-                else if (ligExtendMode) isExtending = true;
+                if (ligSelectMode) { isMoving = true; drawSelectionOverlay(); }
+                else if (ligExtendMode) { isExtending = true; drawSelectionOverlay(); }
             } else {
                 isSelecting = true;
                 selectionRect = { x, y, w: 0, h: 0, dx: 0, dy: 0, ow: 0, oh: 0 };
@@ -2511,27 +2526,45 @@
         const x = (e.clientX - rect.left) * scaleX;
         const y = (e.clientY - rect.top) * scaleY;
 
-        if (isDrawing) drawAt(x, y);
-        if (isSelecting) {
-            selectionRect.w = x - selectionRect.x;
-            selectionRect.h = y - selectionRect.y;
-            selectionRect.ow = selectionRect.w;
-            selectionRect.oh = selectionRect.h;
-            drawSelectionOverlay();
+        if (ligEraseMode) {
+            if (isDrawing) drawAt(x, y);
+            ligOverlayCtx.clearRect(0, 0, ligOverlayCanvas.width, ligOverlayCanvas.height);
+            ligOverlayCtx.beginPath();
+            const radius = document.getElementById('ligEraseSize').value / 2;
+            ligOverlayCtx.arc(x, y, radius, 0, Math.PI * 2);
+            ligOverlayCtx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
+            ligOverlayCtx.lineWidth = 1;
+            ligOverlayCtx.stroke();
+            ligOverlayCtx.fillStyle = 'rgba(255, 0, 0, 0.1)';
+            ligOverlayCtx.fill();
+        } else {
+            if (isSelecting) {
+                selectionRect.w = x - selectionRect.x;
+                selectionRect.h = y - selectionRect.y;
+                selectionRect.ow = selectionRect.w;
+                selectionRect.oh = selectionRect.h;
+                drawSelectionOverlay();
+            }
+            if (isMoving) {
+                const dx = e.movementX * scaleX;
+                const dy = e.movementY * scaleY;
+                selectionRect.dx = (selectionRect.dx || 0) + dx;
+                selectionRect.dy = (selectionRect.dy || 0) + dy;
+                drawSelectionOverlay();
+            }
+            if (isExtending) {
+                const dw = e.movementX * scaleX;
+                const dh = e.movementY * scaleY;
+                selectionRect.w += dw;
+                selectionRect.h += dh;
+                drawSelectionOverlay();
+            }
         }
-        if (isMoving) {
-            const dx = e.movementX * scaleX;
-            const dy = e.movementY * scaleY;
-            selectionRect.dx = (selectionRect.dx || 0) + dx;
-            selectionRect.dy = (selectionRect.dy || 0) + dy;
-            drawSelectionOverlay();
-        }
-        if (isExtending) {
-            const dw = e.movementX * scaleX;
-            const dh = e.movementY * scaleY;
-            selectionRect.w += dw;
-            selectionRect.h += dh;
-            drawSelectionOverlay();
+    };
+
+    ligMaskCanvas.onmouseout = () => {
+        if (ligEraseMode) {
+            ligOverlayCtx.clearRect(0, 0, ligOverlayCanvas.width, ligOverlayCanvas.height);
         }
     };
 
@@ -2585,6 +2618,45 @@
         ligMaskCtx.moveTo(x, y);
     }
 
+    function drawSelectionOverlay() {
+        ligOverlayCtx.clearRect(0, 0, ligOverlayCanvas.width, ligOverlayCanvas.height);
+        if (!selectionRect) return;
+        
+        const rx = selectionRect.x + (selectionRect.dx || 0);
+        const ry = selectionRect.y + (selectionRect.dy || 0);
+        const rw = selectionRect.w;
+        const rh = selectionRect.h;
+
+        if (isMoving || isExtending) {
+            const sx = Math.min(selectionRect.x, selectionRect.x + selectionRect.ow);
+            const sy = Math.min(selectionRect.y, selectionRect.y + selectionRect.oh);
+            const sw = Math.abs(selectionRect.ow);
+            const sh = Math.abs(selectionRect.oh);
+            
+            const img = document.getElementById('ligPreviewImg');
+            try {
+                const dx = Math.min(rx, rx + rw);
+                const dy = Math.min(ry, ry + rh);
+                const dw = Math.abs(rw);
+                const dh = Math.abs(rh);
+                ligOverlayCtx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+            } catch (e) {
+                console.error("Failed to draw extracted image", e);
+            }
+        }
+
+        ligOverlayCtx.strokeStyle = ligSelectMode ? '#4f46e5' : '#10b981';
+        ligOverlayCtx.lineWidth = 2;
+        ligOverlayCtx.setLineDash([4, 4]);
+        
+        ligOverlayCtx.strokeRect(rx, ry, rw, rh);
+        
+        if (!isMoving && !isExtending) {
+            ligOverlayCtx.fillStyle = ligSelectMode ? 'rgba(79, 70, 229, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+            ligOverlayCtx.fillRect(rx, ry, rw, rh);
+        }
+    }
+
     async function ligInjectDataset() {
         const container = document.getElementById('ligSequenceBuilder');
         const wrappers = container.querySelectorAll('.lig-slot-wrapper');
@@ -2629,7 +2701,11 @@
       wrappers.forEach(wrapper => {
           const char = wrapper.querySelector('.lig-char-select').value;
           const sliders = wrapper.querySelectorAll('.lig-slider');
-          const config = { char: char };
+          const config = { 
+              char: char,
+              mask: wrapper.maskData || null,
+              adjustments: wrapper.adjustments || []
+          };
           sliders.forEach(s => config[s.dataset.prop] = parseFloat(s.value));
           chars.push(config);
       });
@@ -2644,8 +2720,8 @@
       const payload = {
         sequence: seq,
         chars: chars,
-        mask: ligMaskCanvas.toDataURL(),
-        adjustments: ligManualAdjustments
+        mask: null,
+        adjustments: []
       };
 
       const statusEl = document.getElementById('ligStatus');
@@ -2685,7 +2761,7 @@
           chip.innerHTML = `
             <div style="font-family: 'NithyaRanjanaDU-Regular'; font-size: 1.8rem; margin-bottom: 4px;">${ranjanaSeq}</div>
             <div style="font-size:0.65rem; color:var(--muted);">${seq}</div>
-            <div style="font-size:0.7rem; color:var(--accent1); font-weight:bold; margin-top:4px;">${data[seq].y_offset_overlap}px overlap</div>
+            <div style="font-size:0.7rem; color:var(--accent1); font-weight:bold; margin-top:4px;">${data[seq].length}-character rule</div>
           `;
           chip.onclick = () => {
             const parts = seq.split('+');
