@@ -263,6 +263,77 @@
       background: rgba(52, 211, 153, 0.22);
     }
 
+    .btn-admin {
+      background: var(--surface2);
+      color: var(--accent2);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+    }
+    .btn-admin:hover {
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+    
+    /* Admin Modal */
+    .admin-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    
+    .admin-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: modalFadeIn 0.3s ease;
+    }
+    
+    @keyframes modalFadeIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    .admin-modal-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .admin-modal-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+    
+    .admin-modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
     /* ── Progress / Status bar ── */
     .status-bar {
       background: var(--surface2);
@@ -896,6 +967,8 @@
         <div class="dot" id="dotModel"></div>
         <span id="lblModel">No Model</span>
       </div>
+      <button class="btn-admin" id="btnAdminAction" onclick="handleAdminAction()">🔒 Admin Login</button>
+      <button class="btn-admin" id="btnChangePassword" onclick="openChangePasswordModal()" style="display: none; margin-left: 8px;">🔑 Change Password</button>
     </div>
   </header>
 
@@ -924,17 +997,17 @@
 
     <!-- Tabs -->
     <div class="tabs" role="tablist">
-      <button class="tab active" id="tabGenerate" onclick="switchTab('generate')">⚡ Generate Data</button>
-      <button class="tab" id="tabTrain" onclick="switchTab('train')">🧠 Train Model</button>
-      <button class="tab" id="tabPredict" onclick="switchTab('predict')">🔍 Predict Char</button>
-      <button class="tab" id="tabWord" onclick="switchTab('word')">📝 Word Builder</button>
-      <button class="tab" id="tabMonogram" onclick="switchTab('monogram')">🎨 Monogram</button>
-      <button class="tab" id="tabGlyph" onclick="switchTab('glyph')">🛠️ Glyph Studio</button>
-      <button class="tab" id="tabLigature" onclick="switchTab('ligature')">🔗 Ligature Studio</button>
+      <button class="tab" id="tabGenerate" onclick="switchTab('generate')" style="display: none;">⚡ Generate Data</button>
+      <button class="tab" id="tabTrain" onclick="switchTab('train')" style="display: none;">🧠 Train Model</button>
+      <button class="tab" id="tabPredict" onclick="switchTab('predict')" style="display: none;">🔍 Predict Char</button>
+      <button class="tab" id="tabWord" onclick="switchTab('word')" style="display: none;">📝 Word Builder</button>
+      <button class="tab active" id="tabMonogram" onclick="switchTab('monogram')">🎨 Monogram</button>
+      <button class="tab" id="tabGlyph" onclick="switchTab('glyph')" style="display: none;">🛠️ Glyph Studio</button>
+      <button class="tab" id="tabLigature" onclick="switchTab('ligature')" style="display: none;">🔗 Ligature Studio</button>
     </div>
 
     <!-- Generate Panel -->
-    <div class="panel active" id="panelGenerate">
+    <div class="panel" id="panelGenerate">
       <div class="card">
         <div class="card-title">📦 Dataset Generator</div>
         <div class="card-desc">
@@ -1100,7 +1173,7 @@
     </div>
 
     <!-- Monogram Panel -->
-    <div class="panel" id="panelMonogram">
+    <div class="panel active" id="panelMonogram">
 
       <div class="mono-grid">
 
@@ -2775,13 +2848,175 @@
       }
     }
 
+    // ── Admin Authentication Logic ──
+    let adminToken = localStorage.getItem('adminToken') || null;
+
+    // Global fetch interceptor for auth headers and session management
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options) {
+      options = options || {};
+      if (adminToken) {
+        options.headers = options.headers || {};
+        if (options.headers instanceof Headers) {
+          options.headers.set('Authorization', 'Bearer ' + adminToken);
+        } else {
+          options.headers['Authorization'] = 'Bearer ' + adminToken;
+        }
+      }
+      return originalFetch(url, options).then(response => {
+        if (response.status === 401) {
+          adminToken = null;
+          localStorage.removeItem('adminToken');
+          updateAdminUI();
+          alert('Session expired or unauthorized. Please log in again.');
+        }
+        return response;
+      });
+    };
+
+    function updateAdminUI() {
+      const adminTabs = ['tabGenerate', 'tabTrain', 'tabPredict', 'tabWord', 'tabGlyph', 'tabLigature'];
+      const btnAdminAction = document.getElementById('btnAdminAction');
+      const btnChangePassword = document.getElementById('btnChangePassword');
+
+      if (adminToken) {
+        adminTabs.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'inline-flex';
+        });
+        btnAdminAction.textContent = '🔓 Admin Logout';
+        btnChangePassword.style.display = 'inline-flex';
+      } else {
+        adminTabs.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        });
+        btnAdminAction.textContent = '🔒 Admin Login';
+        btnChangePassword.style.display = 'none';
+        
+        const currentActiveTab = document.querySelector('.tab.active');
+        if (currentActiveTab && adminTabs.includes(currentActiveTab.id)) {
+          switchTab('monogram');
+        }
+      }
+    }
+
+    function handleAdminAction() {
+      if (adminToken) {
+        adminToken = null;
+        localStorage.removeItem('adminToken');
+        updateAdminUI();
+      } else {
+        document.getElementById('adminLoginModal').style.display = 'flex';
+        document.getElementById('adminPasswordInput').value = '';
+        document.getElementById('adminPasswordInput').focus();
+      }
+    }
+
+    function closeAdminLogin() {
+      document.getElementById('adminLoginModal').style.display = 'none';
+    }
+
+    async function submitAdminLogin() {
+      const password = document.getElementById('adminPasswordInput').value;
+      if (!password) return;
+
+      try {
+        const res = await fetch(`${API}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: password })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          adminToken = data.token;
+          localStorage.setItem('adminToken', adminToken);
+          closeAdminLogin();
+          updateAdminUI();
+        } else {
+          alert('Incorrect password. Please try again.');
+        }
+      } catch (e) {
+        alert('Login failed: ' + e.message);
+      }
+    }
+
+    function openChangePasswordModal() {
+      document.getElementById('changePasswordModal').style.display = 'flex';
+      document.getElementById('oldPasswordInput').value = '';
+      document.getElementById('newPasswordInput').value = '';
+      document.getElementById('oldPasswordInput').focus();
+    }
+
+    function closeChangePasswordModal() {
+      document.getElementById('changePasswordModal').style.display = 'none';
+    }
+
+    async function submitChangePassword() {
+      const oldPassword = document.getElementById('oldPasswordInput').value;
+      const newPassword = document.getElementById('newPasswordInput').value;
+      if (!oldPassword || !newPassword) {
+        alert('Please fill in both fields.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/change-password`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ old_password: oldPassword, new_password: newPassword })
+        });
+        if (res.ok) {
+          alert('Password changed successfully! Please log in again.');
+          adminToken = null;
+          localStorage.removeItem('adminToken');
+          closeChangePasswordModal();
+          updateAdminUI();
+        } else {
+          const err = await res.json();
+          alert('Failed: ' + (err.detail || 'Incorrect old password'));
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
     // ── Init ──────────────────────────────────────────────────
+    updateAdminUI();
     refreshStatus();
     glyphPopulateSelect();
     ligPopulateSelects();
     ligLoadRules();
     setInterval(refreshStatus, 5000);
   </script>
+
+  <!-- Admin Login Modal -->
+  <div class="admin-modal-overlay" id="adminLoginModal">
+    <div class="admin-modal">
+      <div class="admin-modal-title">🔒 Admin Authentication</div>
+      <p style="font-size:0.9rem; color:var(--muted); margin-bottom:15px;">Enter the administrator password to unlock training and editing features.</p>
+      <input type="password" class="admin-modal-input" id="adminPasswordInput" placeholder="Password" onkeydown="if(event.key==='Enter') submitAdminLogin()"/>
+      <div class="admin-modal-buttons">
+        <button class="btn btn-ghost" onclick="closeAdminLogin()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitAdminLogin()">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="admin-modal-overlay" id="changePasswordModal">
+    <div class="admin-modal">
+      <div class="admin-modal-title">🔑 Change Password</div>
+      <input type="password" class="admin-modal-input" id="oldPasswordInput" placeholder="Current Password" style="margin-bottom: 10px;"/>
+      <input type="password" class="admin-modal-input" id="newPasswordInput" placeholder="New Password" onkeydown="if(event.key==='Enter') submitChangePassword()"/>
+      <div class="admin-modal-buttons">
+        <button class="btn btn-ghost" onclick="closeChangePasswordModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitChangePassword()">Change Password</button>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

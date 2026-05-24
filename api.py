@@ -3,15 +3,17 @@ import io
 import numpy as np
 import joblib
 from PIL import Image, ImageDraw, ImageFont, ImageChops
-from fastapi import FastAPI, UploadFile, File, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Depends, HTTPException, status, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Optional
 import json
 import data_gen
 import train
+import hashlib
 
 # Configuration
 MODEL_PATH = "ranjana_rf_model.pkl"
@@ -50,8 +52,39 @@ def save_ligature_configs(configs):
 # Consonants: \u0915-\u0939, \u0958-\u095F
 # Vowels: \u0905-\u0914
 # Virama: \u094D
-# Matras/Modifiers: \u0901-\u0903, \u093E-\u094C, \u094D, \u0951-\u0957, \u0962-\u0963
 CLUSTER_REGEX = r'[\u0915-\u0939\u0958-\u095F][\u094D]?[\u093E-\u094C\u0901-\u0903\u0951-\u0957\u0962-\u0963]?|[\u0905-\u0914]'
+
+security = HTTPBearer()
+ADMIN_CONFIG_PATH = "admin_config.json"
+DEFAULT_PASSWORD = "leoshreeram7777"
+
+def get_admin_password_hash():
+    if os.path.exists(ADMIN_CONFIG_PATH):
+        try:
+            with open(ADMIN_CONFIG_PATH, "r", encoding="utf-8") as f:
+                config = json.load(f)
+                return config.get("password_hash")
+        except Exception:
+            pass
+    default_hash = hashlib.sha256(DEFAULT_PASSWORD.encode()).hexdigest()
+    save_admin_password_hash(default_hash)
+    return default_hash
+
+def save_admin_password_hash(pwd_hash):
+    with open(ADMIN_CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump({"password_hash": pwd_hash}, f, indent=2)
+
+def verify_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    stored_hash = get_admin_password_hash()
+    sent_hash = hashlib.sha256(token.encode()).hexdigest()
+    if sent_hash != stored_hash:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid admin credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return token
 
 app = FastAPI(title="Calligraphic-Python API")
 
@@ -63,6 +96,33 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class LoginRequest(BaseModel):
+    password: str
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+@app.post("/login")
+async def login(req: LoginRequest):
+    stored_hash = get_admin_password_hash()
+    sent_hash = hashlib.sha256(req.password.encode()).hexdigest()
+    if sent_hash == stored_hash:
+        return {"success": True, "token": req.password}
+    else:
+        raise HTTPException(status_code=401, detail="Incorrect password")
+
+@app.post("/change-password")
+async def change_password(req: ChangePasswordRequest, admin_pass: str = Depends(verify_admin)):
+    stored_hash = get_admin_password_hash()
+    old_hash = hashlib.sha256(req.old_password.encode()).hexdigest()
+    if old_hash != stored_hash:
+        raise HTTPException(status_code=400, detail="Incorrect old password")
+    
+    new_hash = hashlib.sha256(req.new_password.encode()).hexdigest()
+    save_admin_password_hash(new_hash)
+    return {"message": "Password changed successfully"}
 
 # Serve static files
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
@@ -138,7 +198,7 @@ def run_train():
         job_state["train"]["message"] = str(e)
 
 @app.post("/generate")
-async def generate_data(background_tasks: BackgroundTasks):
+async def generate_data(background_tasks: BackgroundTasks, admin_pass: str = Depends(verify_admin)):
     if job_state["generate"]["status"] == "running":
         return {"message": "Generation already running"}
     job_state["generate"]["status"] = "idle"
@@ -146,7 +206,7 @@ async def generate_data(background_tasks: BackgroundTasks):
     return {"message": "Data generation started"}
 
 @app.post("/train")
-async def train_model(background_tasks: BackgroundTasks):
+async def train_model(background_tasks: BackgroundTasks, admin_pass: str = Depends(verify_admin)):
     if job_state["train"]["status"] == "running":
         return {"message": "Training already running"}
     job_state["train"]["status"] = "idle"
@@ -154,7 +214,7 @@ async def train_model(background_tasks: BackgroundTasks):
     return {"message": "Training started"}
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
+async def predict(file: UploadFile = File(...), admin_pass: str = Depends(verify_admin)):
     if not os.path.exists(MODEL_PATH) or not os.path.exists(CLASSES_PATH):
         return {"error": "Model not trained yet"}
 
@@ -237,7 +297,7 @@ async def get_glyphs():
     return load_glyph_configs()
 
 @app.post("/glyphs/save")
-async def save_glyph(req: GlyphSaveRequest):
+async def save_glyph(req: GlyphSaveRequest, admin_pass: str = Depends(verify_admin)):
     configs = load_glyph_configs()
     if req.char not in configs:
         configs[req.char] = {}
@@ -261,14 +321,14 @@ async def get_ligatures():
     return load_ligature_configs()
 
 @app.post("/ligatures/save")
-async def save_ligature(req: LigatureSaveRequest):
+async def save_ligature(req: LigatureSaveRequest, admin_pass: str = Depends(verify_admin)):
     configs = load_ligature_configs()
     configs[req.sequence] = [c.dict() for c in req.chars]
     save_ligature_configs(configs)
     return {"message": "Ligature rule saved"}
 
 @app.post("/glyphs/preview")
-async def preview_glyph(req: GlyphSaveRequest):
+async def preview_glyph(req: GlyphSaveRequest, admin_pass: str = Depends(verify_admin)):
     # Reuse monogram logic for a single char
     font_path = "NithyaRanjanaDU-Regular.otf"
     font_size = 120
@@ -336,7 +396,7 @@ async def preview_glyph(req: GlyphSaveRequest):
     return StreamingResponse(buf, media_type="image/png")
 
 @app.get("/glyph/preview")
-async def glyph_preview(char: str):
+async def glyph_preview(char: str, admin_pass: str = Depends(verify_admin)):
     font_path = "NithyaRanjanaDU-Regular.otf"
     font_size = 150
     try:
@@ -353,7 +413,7 @@ async def glyph_preview(char: str):
         return {"error": str(e)}
 
 @app.post("/ligatures/preview")
-async def preview_ligature(req: LigatureSaveRequest):
+async def preview_ligature(req: LigatureSaveRequest, admin_pass: str = Depends(verify_admin)):
     font_path = "NithyaRanjanaDU-Regular.otf"
     font_size = 100
     try:
@@ -509,9 +569,9 @@ async def preview_ligature(req: LigatureSaveRequest):
     return StreamingResponse(buf, media_type="image/png")
 
 @app.post("/ligatures/inject")
-async def inject_ligature(req: LigatureSaveRequest):
+async def inject_ligature(req: LigatureSaveRequest, admin_pass: str = Depends(verify_admin)):
     # Render the ligature
-    resp = await preview_ligature(req)
+    resp = await preview_ligature(req, admin_pass=admin_pass)
     if isinstance(resp, dict) and "error" in resp:
         return resp
     
