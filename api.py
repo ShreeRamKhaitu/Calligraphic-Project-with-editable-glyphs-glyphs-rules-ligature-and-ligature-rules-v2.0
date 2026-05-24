@@ -660,14 +660,14 @@ async def generate_monogram(req: MonogramRequest):
         lines = text.split("\n")
     
     # --- Fix for Ranjana Font: Reorder 'i' matra to visual order ---
-    # The NithyaRanjana font seems to require 'ि' (\u093F) to be BEFORE the consonant.
+    # This reorder is only needed for single-line (horizontal) rendering.
+    # When vertical stacking is active, the shared matra pre-pass handles it directly.
     i_matra = '\u093F'
     processed_lines = []
     
     for line in lines:
         if i_matra in line:
-            # We need to reorder 'ि' to the start of each cluster it belongs to
-            # even in horizontal lines.
+            # Reorder 'ि' to the start of each cluster for horizontal rendering
             clusters = re.findall(CLUSTER_REGEX, line)
             new_line = ""
             for c in clusters:
@@ -675,15 +675,41 @@ async def generate_monogram(req: MonogramRequest):
                     new_line += i_matra + c.replace(i_matra, '')
                 else:
                     new_line += c
-            # Append non-cluster characters (like spaces)
             remaining = line
             for c in clusters:
                 remaining = remaining.replace(c, '', 1)
-            new_line += remaining # Fallback for spaces/other chars
+            new_line += remaining
             processed_lines.append(new_line)
         else:
             processed_lines.append(line)
     lines = processed_lines
+
+    # --- Shared Matra Pre-pass ---
+    # If ANY cluster carries a vowel-sign matra, strip ALL matras from every cluster
+    # and record which matra + position to render as one shared glyph spanning the stack.
+    MATRA_POS = {
+        '\u093E': 'right',   # aa ा
+        '\u093F': 'left',    # i  ि
+        '\u0940': 'right',   # ii ी
+        '\u0941': 'below',   # u  ु
+        '\u0942': 'below',   # uu ू
+        '\u0947': 'above',   # e  े
+        '\u0948': 'above',   # ai ै
+        '\u094B': 'right',   # o  ो
+        '\u094C': 'right',   # au ौ
+    }
+    shared_matra = None
+    shared_matra_pos = None
+    for ln in lines:
+        for m_ch, m_p in MATRA_POS.items():
+            if m_ch in ln:
+                shared_matra = m_ch
+                shared_matra_pos = m_p
+                break
+        if shared_matra:
+            break
+    if shared_matra:
+        lines = [''.join(ch for ch in ln if ch not in MATRA_POS) for ln in lines]
 
     # --- Pre-process Ligatures ---
     lig_configs = load_ligature_configs() if req.use_overrides else {}
@@ -744,6 +770,13 @@ async def generate_monogram(req: MonogramRequest):
     current_visible_bottom = y_cursor
     first_item = True
     
+    first_char_origin_x = None
+    first_char_origin_y = None
+    first_char_text = None
+    last_char_origin_x = None
+    last_char_origin_y = None
+    last_char_text = None
+
     for i, item in enumerate(merged_lines):
         line = item["text"]
         
@@ -966,10 +999,189 @@ async def generate_monogram(req: MonogramRequest):
                 
                 img.paste(cluster_img, (req.padding + x_base + x_off, paste_y), cluster_img)
                 
+                if first_char_origin_x is None:
+                    first_char_origin_x = (req.padding + x_base + x_off) - bb[0]
+                    first_char_origin_y = paste_y - bb[1]
+                    first_char_text = display_text
+                last_char_origin_x = (req.padding + x_base + x_off) - bb[0]
+                last_char_origin_y = paste_y - bb[1]
+                last_char_text = display_text
+                
                 current_visible_bottom = paste_y + actual_bbox[3]
             else:
                 if not first_item:
                     current_visible_bottom += line_height + req.line_spacing
+
+    # --- Render Shared Matra ---
+    if shared_matra and shared_matra_pos:
+        stack_bbox = img.getbbox()
+        if stack_bbox:
+            s_top, s_bottom = stack_bbox[1], stack_bbox[3]
+            s_left, s_right = stack_bbox[0], stack_bbox[2]
+            s_h = s_bottom - s_top
+            s_w = s_right - s_left
+
+            # Extract matra glyph exact coordinates relative to first and last characters
+            mfont = ImageFont.truetype(font_path, req.font_size)
+            tw, th = 500, 500
+
+            def _get_matra_bbox_and_glyph(base_char, matra_char, pos='right'):
+                if not base_char: base_char = '\u0930'
+                
+                if pos == 'left':
+                    # CRITICAL: Many consonants (ka, kha, etc.) change their own shape when
+                    # combined with ikar. The diff of (consonant+ikar) minus (consonant) therefore
+                    # contains both the ikar arch AND fragments of the consonant's changed shape.
+                    # To get a PURE ikar arch, we MUST use a fixed neutral consonant (ra = र)
+                    # as the extraction base — ra does NOT change shape when combined with ikar.
+                    extraction_base = '\u0930'  # ra — shape-stable with ikar
+                else:
+                    extraction_base = base_char
+                    
+                text_with = extraction_base + matra_char
+                temp_with = Image.new('RGBA', (tw, th), (0,0,0,0))
+                ImageDraw.Draw(temp_with).text((100, 100), text_with, font=mfont, fill=fg)
+                temp_ref = Image.new('RGBA', (tw, th), (0,0,0,0))
+                ImageDraw.Draw(temp_ref).text((100, 100), extraction_base, font=mfont, fill=fg)
+                
+                from PIL import ImageChops
+                diff = ImageChops.difference(temp_with, temp_ref)
+                
+                if pos == 'left':
+                    # Even with ra as base, the font injects a phantom aakar on the right.
+                    # Find the local minimum (natural gap) in the diff's column-alpha profile
+                    # to crop it out, leaving only the pure ikar arch.
+                    bb = diff.getbbox()
+                    if bb:
+                        pixels = diff.load()
+                        col_alpha = [(x, sum(pixels[x, y][3] for y in range(th))) for x in range(tw)]
+                        
+                        rightmost = tw - 1
+                        while rightmost > 0 and col_alpha[rightmost][1] == 0:
+                            rightmost -= 1
+                            
+                        peak_x = rightmost
+                        peak_val = col_alpha[rightmost][1]
+                        for x in range(rightmost, 0, -1):
+                            if col_alpha[x][1] > peak_val:
+                                peak_val = col_alpha[x][1]
+                                peak_x = x
+                            elif col_alpha[x][1] < peak_val / 2:
+                                break
+                                
+                        min_x = peak_x
+                        min_val = peak_val
+                        for x in range(peak_x, bb[0], -1):
+                            if col_alpha[x][1] < min_val:
+                                min_val = col_alpha[x][1]
+                                min_x = x
+                            elif col_alpha[x][1] > min_val * 1.5 and col_alpha[x][1] > 1000:
+                                break
+                                
+                        clean_diff = Image.new('RGBA', (tw, th), (0,0,0,0))
+                        clean_diff.paste(diff.crop((0, 0, min_x, th)), (0, 0))
+                        return clean_diff.getbbox(), clean_diff
+
+                return diff.getbbox(), diff
+
+            matra_bbox_first, temp_with_first = _get_matra_bbox_and_glyph(first_char_text, shared_matra, shared_matra_pos)
+            matra_bbox_last, temp_with_last = _get_matra_bbox_and_glyph(last_char_text, shared_matra, shared_matra_pos)
+
+            if shared_matra_pos in ('right', 'left'):
+                matra_glyph = temp_with_first.crop(matra_bbox_first) if matra_bbox_first else None
+                if matra_glyph:
+                    dx = matra_bbox_first[0] - 100
+                    dy = matra_bbox_first[1] - 100
+                    if first_char_origin_x is not None:
+                        if shared_matra_pos == 'left':
+                            # Place the ikar arch completely to the LEFT of the consonant stack,
+                            # with a small visual gap — matching how long-ii appears on the right.
+                            paste_x = first_char_origin_x - matra_glyph.width - 4
+                        else:
+                            paste_x = first_char_origin_x + dx
+                        paste_y = first_char_origin_y + dy
+                    else:
+                        paste_x = s_right if shared_matra_pos == 'right' else s_left - matra_glyph.width
+                        paste_y = s_top
+
+
+                    if last_char_origin_y is not None and matra_bbox_last:
+                        target_bottom = last_char_origin_y + (matra_bbox_last[3] - 100)
+                    else:
+                        target_bottom = s_bottom
+                        
+                    target_height = target_bottom - paste_y
+                    
+                    if target_height > matra_glyph.height:
+                        split_y1 = int(matra_glyph.height * 0.6)
+                        split_y2 = int(matra_glyph.height * 0.9)
+                        
+                        top_part = matra_glyph.crop((0, 0, matra_glyph.width, split_y1))
+                        mid_part = matra_glyph.crop((0, split_y1, matra_glyph.width, split_y2))
+                        bot_part = matra_glyph.crop((0, split_y2, matra_glyph.width, matra_glyph.height))
+                        
+                        target_mid_h = target_height - top_part.height - bot_part.height
+                        if target_mid_h > 0:
+                            mid_scaled = mid_part.resize((matra_glyph.width, target_mid_h), Image.LANCZOS)
+                            scaled = Image.new('RGBA', (matra_glyph.width, target_height), (0,0,0,0))
+                            scaled.paste(top_part, (0, 0))
+                            scaled.paste(mid_scaled, (0, split_y1))
+                            scaled.paste(bot_part, (0, split_y1 + target_mid_h))
+                        else:
+                            scaled = matra_glyph.resize((matra_glyph.width, target_height), Image.LANCZOS)
+                    else:
+                        scaled = matra_glyph.resize((matra_glyph.width, max(1, target_height)), Image.LANCZOS)
+                        
+                    if paste_x < 0:
+                        shift_x = -paste_x + req.padding
+                        ni = Image.new('RGBA', (img.width + shift_x, img.height), bg)
+                        ni.paste(img, (shift_x, 0))
+                        img = ni
+                        paste_x = req.padding
+
+                    need_w = paste_x + scaled.width
+                    if need_w > img.width:
+                        ni = Image.new('RGBA', (need_w, img.height), bg)
+                        ni.paste(img, (0,0)); img = ni
+                    img.paste(scaled, (paste_x, paste_y), scaled)
+
+            elif shared_matra_pos == 'below':
+                matra_glyph_l = temp_with_last.crop(matra_bbox_last) if matra_bbox_last else None
+                if matra_glyph_l:
+                    dx_l = matra_bbox_last[0] - 100
+                    dy_l = matra_bbox_last[1] - 100
+                    if last_char_origin_x is not None:
+                        paste_x = last_char_origin_x + dx_l
+                        paste_y = last_char_origin_y + dy_l
+                    else:
+                        paste_x = s_left + (s_w - matra_glyph_l.width) // 2
+                        paste_y = s_bottom + 2
+
+                    need_h = paste_y + matra_glyph_l.height + 4
+                    if need_h > img.height:
+                        ni = Image.new('RGBA', (img.width, need_h), bg)
+                        ni.paste(img, (0,0)); img = ni
+                    img.paste(matra_glyph_l, (paste_x, paste_y), matra_glyph_l)
+
+            elif shared_matra_pos == 'above':
+                matra_glyph_f = temp_with_first.crop(matra_bbox_first) if matra_bbox_first else None
+                if matra_glyph_f:
+                    dx_f = matra_bbox_first[0] - 100
+                    dy_f = matra_bbox_first[1] - 100
+                    if first_char_origin_x is not None:
+                        paste_x = first_char_origin_x + dx_f
+                        paste_y = first_char_origin_y + dy_f
+                    else:
+                        paste_x = s_left + (s_w - matra_glyph_f.width) // 2
+                        paste_y = s_top - matra_glyph_f.height - 2
+
+                    if paste_y < 0:
+                        shift = -paste_y + 2
+                        ni = Image.new('RGBA', (img.width, img.height + shift), bg)
+                        ni.paste(img, (0, shift)); img = ni
+                        paste_y = 0
+                        
+                    img.paste(matra_glyph_f, (paste_x, paste_y), matra_glyph_f)
 
     # Crop the final image to content bounds vertically
     final_bbox = img.getbbox()

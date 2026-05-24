@@ -2033,8 +2033,9 @@
     function glyphPopulateSelect() {
       const sel = document.getElementById('glyphChar');
       sel.innerHTML = '';
-      // Only include consonants and vowels for simplicity
+      // Only include basic consonants and vowels for simplicity
       const labels = Object.keys(DEVA_MAP).filter(k => k !== '*' && !/[0-9]/.test(k));
+      
       labels.forEach(k => {
         const opt = document.createElement('option');
         opt.value = DEVA_MAP[k];
