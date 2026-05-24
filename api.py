@@ -1029,59 +1029,37 @@ async def generate_monogram(req: MonogramRequest):
                 if not base_char: base_char = '\u0930'
                 
                 if pos == 'left':
-                    # CRITICAL: Many consonants (ka, kha, etc.) change their own shape when
-                    # combined with ikar. The diff of (consonant+ikar) minus (consonant) therefore
-                    # contains both the ikar arch AND fragments of the consonant's changed shape.
-                    # To get a PURE ikar arch, we MUST use a fixed neutral consonant (ra = र)
-                    # as the extraction base — ra does NOT change shape when combined with ikar.
-                    extraction_base = '\u0930'  # ra — shape-stable with ikar
-                else:
-                    extraction_base = base_char
-                    
-                text_with = extraction_base + matra_char
+                    # The cleanest approach: render the matra STANDALONE.
+                    # It shows: [ikar arch stroke] [gap=0] [dotted circle dots]
+                    # The dotted circle is separated by a hard zero-alpha column gap.
+                    # We crop at that gap to get a 100% pure ikar arch — no consonant fragments.
+                    temp_s = Image.new('RGBA', (tw, th), (0,0,0,0))
+                    ImageDraw.Draw(temp_s).text((100, 100), matra_char, font=mfont, fill=fg)
+                    bb_s = temp_s.getbbox()
+                    if bb_s:
+                        s_pix = temp_s.load()
+                        col_alpha = [sum(s_pix[x, y][3] for y in range(th)) for x in range(tw)]
+                        # Find the peak column (ikar arch main stroke)
+                        peak_x = max(range(bb_s[0], bb_s[2]), key=lambda x: col_alpha[x])
+                        # Find first zero column AFTER the peak — this is the gap before dotted circle
+                        gap_x = bb_s[2]
+                        for x in range(peak_x + 1, tw):
+                            if col_alpha[x] == 0:
+                                gap_x = x
+                                break
+                        # Crop to pure ikar arch only
+                        pure_ikar = Image.new('RGBA', (tw, th), (0,0,0,0))
+                        pure_ikar.paste(temp_s.crop((0, 0, gap_x, th)), (0, 0))
+                        return pure_ikar.getbbox(), pure_ikar
+
+                # Right/above/below matras: diff base_char+matra vs base_char alone
+                text_with = base_char + matra_char
                 temp_with = Image.new('RGBA', (tw, th), (0,0,0,0))
                 ImageDraw.Draw(temp_with).text((100, 100), text_with, font=mfont, fill=fg)
                 temp_ref = Image.new('RGBA', (tw, th), (0,0,0,0))
-                ImageDraw.Draw(temp_ref).text((100, 100), extraction_base, font=mfont, fill=fg)
-                
+                ImageDraw.Draw(temp_ref).text((100, 100), base_char, font=mfont, fill=fg)
                 from PIL import ImageChops
                 diff = ImageChops.difference(temp_with, temp_ref)
-                
-                if pos == 'left':
-                    # Even with ra as base, the font injects a phantom aakar on the right.
-                    # Find the local minimum (natural gap) in the diff's column-alpha profile
-                    # to crop it out, leaving only the pure ikar arch.
-                    bb = diff.getbbox()
-                    if bb:
-                        pixels = diff.load()
-                        col_alpha = [(x, sum(pixels[x, y][3] for y in range(th))) for x in range(tw)]
-                        
-                        rightmost = tw - 1
-                        while rightmost > 0 and col_alpha[rightmost][1] == 0:
-                            rightmost -= 1
-                            
-                        peak_x = rightmost
-                        peak_val = col_alpha[rightmost][1]
-                        for x in range(rightmost, 0, -1):
-                            if col_alpha[x][1] > peak_val:
-                                peak_val = col_alpha[x][1]
-                                peak_x = x
-                            elif col_alpha[x][1] < peak_val / 2:
-                                break
-                                
-                        min_x = peak_x
-                        min_val = peak_val
-                        for x in range(peak_x, bb[0], -1):
-                            if col_alpha[x][1] < min_val:
-                                min_val = col_alpha[x][1]
-                                min_x = x
-                            elif col_alpha[x][1] > min_val * 1.5 and col_alpha[x][1] > 1000:
-                                break
-                                
-                        clean_diff = Image.new('RGBA', (tw, th), (0,0,0,0))
-                        clean_diff.paste(diff.crop((0, 0, min_x, th)), (0, 0))
-                        return clean_diff.getbbox(), clean_diff
-
                 return diff.getbbox(), diff
 
             matra_bbox_first, temp_with_first = _get_matra_bbox_and_glyph(first_char_text, shared_matra, shared_matra_pos)
