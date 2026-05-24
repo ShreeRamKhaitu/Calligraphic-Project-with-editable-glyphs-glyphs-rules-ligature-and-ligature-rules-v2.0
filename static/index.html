@@ -1114,8 +1114,8 @@
           <label class="mono-label" for="monoInput">Text</label>
           <textarea class="mono-input" id="monoInput" placeholder="e.g.  namaskar  or  नमस्कार" rows="3"
             oninput="monoOnInput()"></textarea>
-          <div class="mono-detect-badge" id="monoDetect">type something…</div>
-          <div class="mono-converted" id="monoConverted"></div>
+          <div class="mono-detect-badge" id="monoDetect" style="display: none;">type something…</div>
+          <div class="mono-converted" id="monoConverted" style="display: none;"></div>
 
           <div style="margin-top: 20px;"></div>
           
@@ -1777,9 +1777,7 @@
       } else {
         detectEl.textContent = 'Detected: Romanized';
         detectEl.className = 'mono-detect-badge roman';
-        // Auto-convert preview
-        const converted = translitToDeva(input);
-        convEl.innerHTML = `Convered to: <span>${converted}</span>`;
+        convEl.innerHTML = '';
       }
     }
 

@@ -192,7 +192,7 @@ class MonogramRequest(BaseModel):
     fg_color: str = "#2d1b69"
     bg_color: Optional[str] = "#ffffff"  # None = transparent
     padding: int = 40
-    line_spacing: int = 10
+    line_spacing: int = 0
     vertical: bool = True
     use_overrides: bool = True
 
@@ -681,6 +681,8 @@ async def generate_monogram(req: MonogramRequest):
     fg = (*_hex_to_rgb(req.fg_color), 255)
     
     y_cursor = req.padding + safety_top
+    current_visible_bottom = y_cursor
+    first_item = True
     
     for i, item in enumerate(merged_lines):
         line = item["text"]
@@ -803,11 +805,19 @@ async def generate_monogram(req: MonogramRequest):
                 # as they have been migrated to per-character properties.
                 
                 x_base = (total_width - lig_final.width) // 2
-                img.paste(lig_final, (req.padding + x_base, y_cursor), lig_final)
                 
-                y_cursor += lig_final.height + req.line_spacing
+                if first_item:
+                    paste_y = y_cursor
+                    first_item = False
+                else:
+                    paste_y = current_visible_bottom + req.line_spacing - l_bbox[1]
+                
+                img.paste(lig_final, (req.padding + x_base, paste_y), lig_final)
+                
+                current_visible_bottom = paste_y + l_bbox[3]
             else:
-                y_cursor += line_height + req.line_spacing
+                if not first_item:
+                    current_visible_bottom += line_height + req.line_spacing
             
             # Since we've handled the whole ligature, we continue to the next merged_line
             continue
@@ -824,8 +834,8 @@ async def generate_monogram(req: MonogramRequest):
                 # Bottom character: try 'last' then 'full'
                 priority = ["last", "full"]
             else:
-                # Middle characters: prefer 'half' or 'middle' variants
-                priority = ["half", "middle", "full"]
+                # Middle characters: try 'middle' then 'full'
+                priority = ["middle", "full"]
             
             override = None
             for p in priority:
@@ -838,16 +848,17 @@ async def generate_monogram(req: MonogramRequest):
             display_text = line
             
             # (Standard rendering logic continues...)
+            scale_factor = req.font_size / 120.0
             scale = override.get("scale", 1.0)
-            x_off = override.get("x_offset", 0)
-            y_off = override.get("y_offset", 0)
+            x_off = int(override.get("x_offset", 0) * scale_factor)
+            y_off = int(override.get("y_offset", 0) * scale_factor)
             rot = override.get("rotation", 0.0)
             sx = override.get("skew_x", 0.0)
             sy = override.get("skew_y", 0.0)
-            c_top = override.get("crop_top", 0)
-            c_bottom = override.get("crop_bottom", 0)
-            c_left = override.get("crop_left", 0)
-            c_right = override.get("crop_right", 0)
+            c_top = int(override.get("crop_top", 0) * scale_factor)
+            c_bottom = int(override.get("crop_bottom", 0) * scale_factor)
+            c_left = int(override.get("crop_left", 0) * scale_factor)
+            c_right = int(override.get("crop_right", 0) * scale_factor)
 
             current_font = font
             if scale != 1.0:
@@ -883,10 +894,29 @@ async def generate_monogram(req: MonogramRequest):
             
             cluster_img = temp_layer.crop((tx + bb[0], ty + bb[1], tx + bb[2], ty + bb[3]))
             
-            x_base = (total_width - (bb[2]-bb[0])) // 2
-            img.paste(cluster_img, (req.padding + x_base + x_off, y_cursor + y_off), cluster_img)
-            
-            y_cursor += line_height + req.line_spacing
+            actual_bbox = cluster_img.getbbox()
+            if actual_bbox:
+                x_base = (total_width - (bb[2]-bb[0])) // 2
+                
+                if first_item:
+                    paste_y = y_cursor + y_off
+                    first_item = False
+                else:
+                    paste_y = current_visible_bottom + req.line_spacing - actual_bbox[1] + y_off
+                
+                img.paste(cluster_img, (req.padding + x_base + x_off, paste_y), cluster_img)
+                
+                current_visible_bottom = paste_y + actual_bbox[3]
+            else:
+                if not first_item:
+                    current_visible_bottom += line_height + req.line_spacing
+
+    # Crop the final image to content bounds vertically
+    final_bbox = img.getbbox()
+    if final_bbox:
+        crop_top = max(0, final_bbox[1] - req.padding)
+        crop_bottom = min(img.height, final_bbox[3] + req.padding)
+        img = img.crop((0, crop_top, img.width, crop_bottom))
 
     # --- Return PNG stream ---
     buf = io.BytesIO()
