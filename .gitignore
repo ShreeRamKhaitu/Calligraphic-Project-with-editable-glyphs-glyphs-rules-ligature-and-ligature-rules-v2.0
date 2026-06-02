@@ -3,6 +3,9 @@
 venv/
 env/
 
+# Sensitive config (contains admin password hash)
+admin_config.json
+
 # Python cache
 __pycache__/
 *.pyc
