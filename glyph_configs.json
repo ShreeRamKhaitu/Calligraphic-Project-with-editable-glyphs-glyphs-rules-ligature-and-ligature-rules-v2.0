@@ -35,7 +35,7 @@
       "skew_x": 0.0,
       "skew_y": 0.0,
       "crop_top": 17,
-      "crop_bottom": 9,
+      "crop_bottom": 12,
       "crop_left": 0,
       "crop_right": 0
     },
@@ -76,6 +76,18 @@
       "crop_bottom": 0,
       "crop_left": 0,
       "crop_right": 0
+    },
+    "middle": {
+      "scale": 1.0,
+      "x_offset": 9,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 22,
+      "crop_bottom": 14,
+      "crop_left": 0,
+      "crop_right": 0
     }
   },
   "ब": {
@@ -87,6 +99,100 @@
       "skew_x": 0.0,
       "skew_y": 0.0,
       "crop_top": 16,
+      "crop_bottom": 11,
+      "crop_left": 0,
+      "crop_right": 0
+    }
+  },
+  "क": {
+    "last": {
+      "scale": 1.0,
+      "x_offset": 12,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 20,
+      "crop_bottom": 0,
+      "crop_left": 0,
+      "crop_right": 0
+    }
+  },
+  "ल": {
+    "middle": {
+      "scale": 1.0,
+      "x_offset": 0,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 17,
+      "crop_bottom": 11,
+      "crop_left": 0,
+      "crop_right": 0
+    },
+    "last": {
+      "scale": 1.0,
+      "x_offset": 0,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 19,
+      "crop_bottom": 0,
+      "crop_left": 0,
+      "crop_right": 0
+    },
+    "first": {
+      "scale": 1.0,
+      "x_offset": 0,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 0,
+      "crop_bottom": 12,
+      "crop_left": 0,
+      "crop_right": 0
+    }
+  },
+  "त": {
+    "last": {
+      "scale": 1.0,
+      "x_offset": 0,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 19,
+      "crop_bottom": 0,
+      "crop_left": 0,
+      "crop_right": 0
+    }
+  },
+  "भ": {
+    "last": {
+      "scale": 1.0,
+      "x_offset": 5,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 15,
+      "crop_bottom": 0,
+      "crop_left": 0,
+      "crop_right": 0
+    }
+  },
+  "स": {
+    "first": {
+      "scale": 1.0,
+      "x_offset": 0,
+      "y_offset": 0,
+      "rotation": 0.0,
+      "skew_x": 0.0,
+      "skew_y": 0.0,
+      "crop_top": 0,
       "crop_bottom": 11,
       "crop_left": 0,
       "crop_right": 0

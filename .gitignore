@@ -8,7 +8,9 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Dataset (large binary files)
+# Large model files (exceed GitHub's 100MB limit)
+ranjana_rf_model.pkl
+*.pkl
 
 # Server logs
 server.log
