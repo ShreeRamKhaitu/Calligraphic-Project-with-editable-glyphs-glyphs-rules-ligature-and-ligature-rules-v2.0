@@ -1137,6 +1137,7 @@ async def generate_monogram(req: MonogramRequest):
 
             def _get_matra_bbox_and_glyph(base_char, matra_char, pos='right'):
                 if not base_char or pos == 'below': base_char = '\u0915'
+                if pos == 'above': base_char = '\u0930'
                 
                 if pos == 'left':
                     # The cleanest approach: render the matra STANDALONE.
