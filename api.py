@@ -708,10 +708,10 @@ async def generate_monogram(req: MonogramRequest):
         '\u0942': 'below',   # uu ू
 
 
-        '\u0947': 'above',   # e  े
 
 
-        '\u0948': 'above',   # ai ै
+
+
 
 
         '\u094B': 'right',   # o  ो
@@ -1137,7 +1137,6 @@ async def generate_monogram(req: MonogramRequest):
 
             def _get_matra_bbox_and_glyph(base_char, matra_char, pos='right'):
                 if not base_char or pos == 'below': base_char = '\u0915'
-                if pos == 'above': base_char = '\u0930'
                 
                 if pos == 'left':
                     # The cleanest approach: render the matra STANDALONE.
@@ -1271,6 +1270,19 @@ async def generate_monogram(req: MonogramRequest):
                 temp_ref = Image.new('RGBA', (tw, th), (0,0,0,0))
                 ImageDraw.Draw(temp_ref).text((100, 100), base_char, font=mfont, fill=fg)
                 from PIL import ImageChops
+                if pos == 'above':
+                    # For 'above' matras (e.g. ekar), the font shifts the base consonant
+                    # rightward to make room for the matra. A naive diff creates ghosting.
+                    # Fix: align the right edges of both images before subtracting.
+                    bbox_with = temp_with.getbbox()
+                    bbox_ref = temp_ref.getbbox()
+                    if bbox_with and bbox_ref:
+                        right_shift = bbox_with[2] - bbox_ref[2]
+                        if right_shift != 0:
+                            shifted_ref = Image.new('RGBA', (tw, th), (0,0,0,0))
+                            shifted_ref.paste(temp_ref, (right_shift, 0))
+                            diff = ImageChops.difference(temp_with, shifted_ref)
+                            return diff.getbbox(), diff
                 diff = ImageChops.difference(temp_with, temp_ref)
                 return diff.getbbox(), diff
 
