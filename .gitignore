@@ -17,6 +17,8 @@ ranjana_rf_model.pkl
 
 # Server logs
 server.log
+server_log.txt
+test_log*.txt
 nohup.out
 
 # Scratch outputs
