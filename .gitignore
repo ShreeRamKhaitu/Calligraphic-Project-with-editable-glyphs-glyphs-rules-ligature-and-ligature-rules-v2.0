@@ -3,6 +3,9 @@
 venv/
 env/
 
+# Checkpoints
+checkpoints/
+
 # Sensitive config (contains admin password hash)
 admin_config.json
 

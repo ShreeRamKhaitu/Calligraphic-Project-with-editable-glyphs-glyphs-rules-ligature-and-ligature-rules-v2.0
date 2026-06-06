@@ -668,6 +668,23 @@
       position: relative;
     }
 
+    .mono-preview-wrap.white-bg {
+      background: #ffffff;
+    }
+
+    .mono-preview-wrap .grid-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      background-image: 
+        linear-gradient(to right, rgba(200, 200, 200, 0.5) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(200, 200, 200, 0.5) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
     .mono-preview-wrap img {
       max-width: 100%;
       max-height: 480px;
@@ -1259,11 +1276,20 @@
           <div class="card">
             <div class="card-title">🖼️ Preview</div>
             <div class="mono-preview-wrap" id="monoPreviewWrap">
+              <div class="grid-overlay" id="monoGridOverlay" style="display:none;"></div>
               <div class="mono-placeholder" id="monoPlaceholder">
                 <div class="mp-icon">🪷</div>
                 <div>Your Ranjana monogram<br>will appear here</div>
               </div>
               <img id="monoImg" src="" alt="Monogram" style="display:none;">
+            </div>
+            <div style="margin-top:10px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+              <label class="transparent-check">
+                <input type="checkbox" id="monoWhiteBg" onchange="monoUpdatePreviewBackground()"> White Background
+              </label>
+              <label class="transparent-check">
+                <input type="checkbox" id="monoShowGrid" onchange="monoUpdatePreviewBackground()"> Show Grid
+              </label>
             </div>
           </div>
         </div>
@@ -1362,16 +1388,30 @@
             </div>
           </div>
 
-          <button class="btn btn-primary" onclick="glyphSaveConfig()">💾 Save Configuration</button>
-          <div id="glyphStatus" class="mono-converted" style="margin-top: 10px;"></div>
+          <div class="mono-row" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 16px;">
+              <div class="mono-field">
+                <label class="mono-label">Preview Options</label>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                  <label class="transparent-check">
+                    <input type="checkbox" id="glyphWhiteBg" onchange="glyphUpdatePreviewBackground()"> White Background
+                  </label>
+                  <label class="transparent-check">
+                    <input type="checkbox" id="glyphShowGrid" onchange="glyphUpdatePreviewBackground()"> Show Grid
+                  </label>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="glyphSaveConfig()">💾 Save Configuration</button>
+            <div id="glyphStatus" class="mono-converted" style="margin-top: 10px;"></div>
         </div>
 
         <!-- Preview -->
         <div class="card">
           <div class="card-title">🔍 Glyph Preview</div>
-          <div class="mono-preview-wrap">
-            <img id="glyphPreviewImg" src="" alt="Glyph Preview" style="max-height: 200px;">
-          </div>
+          <div class="mono-preview-wrap" id="glyphPreviewWrap">
+              <div class="grid-overlay" id="glyphGridOverlay" style="display:none;"></div>
+              <img id="glyphPreviewImg" src="" alt="Glyph Preview" style="max-height: 200px;">
+            </div>
           <p class="card-desc" style="margin-top: 10px; text-align: center;">This preview shows how the character will appear in the stack.</p>
         </div>
       </div>
@@ -2138,6 +2178,52 @@
         document.getElementById('glyphPreviewImg').src = URL.createObjectURL(blob);
       } catch (e) {
         console.error("Preview failed", e);
+      }
+    }
+    
+    function glyphUpdatePreviewBackground() {
+      const previewWrap = document.getElementById('glyphPreviewWrap');
+      const gridOverlay = document.getElementById('glyphGridOverlay');
+      const whiteBgCheck = document.getElementById('glyphWhiteBg');
+      const showGridCheck = document.getElementById('glyphShowGrid');
+      
+      if (previewWrap) {
+        if (whiteBgCheck && whiteBgCheck.checked) {
+          previewWrap.classList.add('white-bg');
+        } else {
+          previewWrap.classList.remove('white-bg');
+        }
+      }
+      
+      if (gridOverlay) {
+        if (showGridCheck && showGridCheck.checked) {
+          gridOverlay.style.display = 'block';
+        } else {
+          gridOverlay.style.display = 'none';
+        }
+      }
+    }
+
+    function monoUpdatePreviewBackground() {
+      const previewWrap = document.getElementById('monoPreviewWrap');
+      const gridOverlay = document.getElementById('monoGridOverlay');
+      const whiteBgCheck = document.getElementById('monoWhiteBg');
+      const showGridCheck = document.getElementById('monoShowGrid');
+      
+      if (previewWrap) {
+        if (whiteBgCheck && whiteBgCheck.checked) {
+          previewWrap.classList.add('white-bg');
+        } else {
+          previewWrap.classList.remove('white-bg');
+        }
+      }
+      
+      if (gridOverlay) {
+        if (showGridCheck && showGridCheck.checked) {
+          gridOverlay.style.display = 'block';
+        } else {
+          gridOverlay.style.display = 'none';
+        }
       }
     }
 
