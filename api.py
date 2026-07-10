@@ -620,35 +620,18 @@ async def generate_monogram(req: MonogramRequest):
 
 
         # 1. Left/Right Resolution
-
-
         has_i = '\u093F' in present_matras
-
-
         has_ii = '\u0940' in present_matras
-
-
         has_aa = '\u093E' in present_matras
-
-
         
-
-
-        if has_i: final_matras.add('\u093F')
-
-
-        if has_aa and has_ii:
-
-
-            final_matras.add('\u0940') # back ikar overrides aakar
-
-
+        if has_i: 
+            final_matras.add('\u093F')
+            if has_aa:
+                final_matras.add('\u093E')
+        elif has_aa and has_ii:
+            final_matras.add('\u0940')
         else:
-
-
             if has_aa: final_matras.add('\u093E')
-
-
             if has_ii: final_matras.add('\u0940')
 
 
