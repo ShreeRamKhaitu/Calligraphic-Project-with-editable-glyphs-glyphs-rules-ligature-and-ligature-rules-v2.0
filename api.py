@@ -1034,31 +1034,18 @@ async def generate_monogram(req: MonogramRequest):
                                 
 
                         if matra_char == '\u093F':
-
-                            import numpy as np
-
                             from collections import Counter
-
-                            arr = np.array(temp_s)
-
+                            s_pix = temp_s.load()
                             draw = ImageDraw.Draw(temp_s)
 
-                            
-
                             # 1. Erase left decorative dots
-
                             left_edges = []
-
                             for y in range(bb_s[1] + 20, bb_s[3]):
-
-                                row = arr[y, bb_s[0]:bb_s[2], 3]
-
-                                nonzero = np.where(row > 0)[0]
-
-                                if len(nonzero) > 0:
-
-                                    left_edges.append(bb_s[0] + nonzero[0])
-
+                                for x in range(bb_s[0], bb_s[2]):
+                                    if s_pix[x, y][3] > 0:
+                                        left_edges.append(x)
+                                        break
+                            
                             if left_edges:
 
                                 stem_left_x = Counter(left_edges).most_common(1)[0][0]
