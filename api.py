@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import io
 import numpy as np
 import joblib
@@ -15,12 +16,16 @@ import data_gen
 import train
 import hashlib
 
-# Configuration
-MODEL_PATH = "ranjana_rf_model.pkl"
-CLASSES_PATH = "classes.txt"
-DATASET_DIR = "dataset"
-GLYPH_CONFIG_PATH = "glyph_configs.json"
-LIGATURE_CONFIG_PATH = "ligature_configs.json"
+# Configuration — all paths are resolved relative to api.py so the project
+# works on both Windows and Linux regardless of working directory.
+BASE_DIR = Path(__file__).parent
+FONT_PATH = str(BASE_DIR / "NithyaRanjanaDU-Regular.otf")
+MODEL_PATH = str(BASE_DIR / "ranjana_rf_model.pkl")
+CLASSES_PATH = str(BASE_DIR / "classes.txt")
+DATASET_DIR = str(BASE_DIR / "dataset")
+GLYPH_CONFIG_PATH = str(BASE_DIR / "glyph_configs.json")
+LIGATURE_CONFIG_PATH = str(BASE_DIR / "ligature_configs.json")
+ADMIN_CONFIG_PATH = str(BASE_DIR / "admin_config.json")
 
 # Build a single transliteration → Devanagari lookup map
 DEVANAGARI_MAP = {**data_gen.CONSONANTS, **data_gen.VOWELS, **data_gen.NUMBERS, **data_gen.SYMBOLS}
@@ -55,7 +60,6 @@ def save_ligature_configs(configs):
 CLUSTER_REGEX = r'[\u0915-\u0939\u0958-\u095F][\u094D]?[\u093E-\u094C\u0901-\u0903\u0951-\u0957\u0962-\u0963]?|[\u0905-\u0914]'
 
 security = HTTPBearer()
-ADMIN_CONFIG_PATH = "admin_config.json"
 DEFAULT_PASSWORD = "leoshreeram7777"
 
 def get_admin_password_hash():
@@ -125,14 +129,9 @@ async def change_password(req: ChangePasswordRequest, admin_pass: str = Depends(
     return {"message": "Password changed successfully"}
 
 # Serve static files
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+STATIC_DIR = str(BASE_DIR / "static")
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-# Configuration
-MODEL_PATH = "ranjana_rf_model.pkl"
-CLASSES_PATH = "classes.txt"
-DATASET_DIR = "dataset"
 
 # In-memory job state
 job_state = {
@@ -330,7 +329,7 @@ async def save_ligature(req: LigatureSaveRequest, admin_pass: str = Depends(veri
 @app.post("/glyphs/preview")
 async def preview_glyph(req: GlyphSaveRequest, admin_pass: str = Depends(verify_admin)):
     # Reuse monogram logic for a single char
-    font_path = "NithyaRanjanaDU-Regular.otf"
+    font_path = FONT_PATH
     font_size = 120
     try:
         font = ImageFont.truetype(font_path, font_size)
@@ -397,7 +396,7 @@ async def preview_glyph(req: GlyphSaveRequest, admin_pass: str = Depends(verify_
 
 @app.get("/glyph/preview")
 async def glyph_preview(char: str, admin_pass: str = Depends(verify_admin)):
-    font_path = "NithyaRanjanaDU-Regular.otf"
+    font_path = FONT_PATH
     font_size = 150
     try:
         font = ImageFont.truetype(font_path, font_size)
@@ -414,7 +413,7 @@ async def glyph_preview(char: str, admin_pass: str = Depends(verify_admin)):
 
 @app.post("/ligatures/preview")
 async def preview_ligature(req: LigatureSaveRequest, admin_pass: str = Depends(verify_admin)):
-    font_path = "NithyaRanjanaDU-Regular.otf"
+    font_path = FONT_PATH
     font_size = 100
     try:
         font = ImageFont.truetype(font_path, font_size)
@@ -592,7 +591,7 @@ async def inject_ligature(req: LigatureSaveRequest, admin_pass: str = Depends(ve
 
 @app.post("/monogram")
 async def generate_monogram(req: MonogramRequest):
-    font_path = "NithyaRanjanaDU-Regular.otf"
+    font_path = FONT_PATH
     text = req.text.strip()
     if not text:
         return {"error": "No text provided"}

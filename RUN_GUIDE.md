@@ -1,22 +1,64 @@
-# Running the Calligraphic Project
+# Running the Ranjana Calligraphic AI Studio
 
-Follow these steps to get the project up and running:
+## Quick Start
 
-## 1. Start the Backend Server
-Open your terminal in the project directory and run:
+### Linux / Mac
 ```bash
-./.venv/bin/python3 api.py
+bash start.sh
 ```
 
-## 2. Access the Web UI
-Open your browser and navigate to:
-**http://localhost:8000**
+### Windows
+Double-click `start.bat` **or** open Command Prompt in the project folder and run:
+```cmd
+start.bat
+```
 
-## 3. Key Features
+Then open your browser at: **http://localhost:8000**
+
+---
+
+## Manual Setup (First Time Only)
+
+### Step 1 — Create a virtual environment
+
+**Linux:**
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+**Windows:**
+```cmd
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+```
+
+### Step 2 — Start the server
+
+**Linux:**
+```bash
+.venv/bin/python3 api.py
+```
+
+**Windows:**
+```cmd
+.venv\Scripts\python.exe api.py
+```
+
+---
+
+## Key Features
 - **Glyph Studio**: Customize character scaling, offsets, and surgical cropping.
 - **Monogram Generator**: Generate vertical stacks with automatic positional rules (First, Middle, Last).
+- **Ligature Studio**: Build and fine-tune complex ligatures.
 - **Word Builder**: Build words by drawing characters and render them vertically.
 
+---
+
 ## Troubleshooting
-- **Address already in use**: If you see an error about port 8000, run `fuser -k 8000/tcp` to clear the port before starting.
-- **Missing Dependencies**: All required packages are pre-installed in the `.venv` directory.
+
+| Problem | Linux fix | Windows fix |
+|---------|-----------|-------------|
+| Port 8000 in use | `fuser -k 8000/tcp` | `netstat -aon \| findstr :8000` then `taskkill /PID <pid> /F` |
+| Missing packages | `.venv/bin/pip install -r requirements.txt` | `.venv\Scripts\pip install -r requirements.txt` |
+| Font not found | Make sure `NithyaRanjanaDU-Regular.otf` is in the project folder | Same |

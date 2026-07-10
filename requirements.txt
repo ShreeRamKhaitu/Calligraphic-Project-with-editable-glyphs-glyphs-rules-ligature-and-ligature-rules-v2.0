@@ -1,7 +1,5 @@
 Pillow
 numpy
-tensorflow
-opencv-python
 fastapi
 uvicorn
 python-multipart

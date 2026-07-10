@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
@@ -46,9 +47,10 @@ SYMBOLS = {
     '?': '?'
 }
 
-FONT_PATH = "NithyaRanjanaDU-Regular.otf"
+BASE_DIR = Path(__file__).parent
+FONT_PATH = str(BASE_DIR / "NithyaRanjanaDU-Regular.otf")
 IMAGE_SIZE = (64, 64)
-DATASET_DIR = "dataset"
+DATASET_DIR = str(BASE_DIR / "dataset")
 
 def generate_character_image(char, font_path, size=(64, 64)):
     # Create a white background image
